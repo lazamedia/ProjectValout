@@ -23,19 +23,22 @@ class RegisterController extends Controller
             'nama' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username',
             'password' => 'required|string|min:6|confirmed', // pastikan confirm password sesuai dengan form
+        ], [
+            'username.unique' => 'Username sudah ada, silakan pilih username lain.', // Pesan kesalahan untuk username yang sudah ada
         ]);
-
+    
         // Membuat pengguna baru
         $user = User::create([
             'nama' => $request->nama,
             'username' => $request->username,
             'password' => Hash::make($request->password),
         ]);
-
+    
         // Menetapkan role user
         $user->assignRole('user');
-
+    
         // Redirect ke halaman login atau halaman lain setelah register
-        return redirect()->route('/')->with('success', 'Registrasi berhasil. Silakan login.');
+        return redirect()->route('login')->with('success', 'Registrasi berhasil. Silakan login.');
     }
+    
 }

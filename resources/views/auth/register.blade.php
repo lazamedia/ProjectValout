@@ -190,12 +190,15 @@
     <form action="{{ route('register') }}" method="POST">
       @csrf
       <div class="input-box">
-        <input type="text" name="nama" id="nama" required>
+        <input type="text" name="nama" id="nama" required  value="{{ old('nama') }}">
         <label>Nama</label>
       </div>
       <div class="input-box">
-        <input type="text" name="username" id="username" required>
+        <input type="text" name="username" id="username" required value="{{ old('username') }}">
         <label>Username</label>
+        @if ($errors->has('username'))
+        <span style="color: red; font-size: 12px;">{{ $errors->first('username') }}</span>
+        @endif
       </div>
       <div class="input-box">
         <input type="password" name="password" id="password" required oninput="validatePassword()">

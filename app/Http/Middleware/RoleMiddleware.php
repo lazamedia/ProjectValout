@@ -14,9 +14,10 @@ class RoleMiddleware
         }
 
         $user = Auth::user();
+
         // Memeriksa apakah pengguna memiliki salah satu dari role yang diperbolehkan
         if (!$user->hasAnyRole($roles)) {
-            return redirect('/'); // Atau arahkan ke halaman tidak diizinkan
+            return redirect('404'); // Atau arahkan ke halaman tidak diizinkan
         }
 
         return $next($request);

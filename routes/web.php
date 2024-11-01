@@ -22,9 +22,9 @@ Route::get('/register', function () {
 });
 
 Route::get('/home', function () {
-    return view('home',[
-        "title" => "home",
-        "active" => "home"
+    return view('user',[
+        "title" => "user",
+        "active" => "user"
     ]);
 });
 

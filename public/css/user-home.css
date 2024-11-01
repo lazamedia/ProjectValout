@@ -161,4 +161,7 @@ body {
     .header{
         flex-direction: column;
     }
+    .table-dark th, .table-dark td {
+        padding: px;
+    }
 }
