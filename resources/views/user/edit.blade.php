@@ -12,7 +12,7 @@
     body {
         background-color: #111325;
         color: #f5f5f5;
-        font-family: 'tilt-neon', sans-serif;
+        font-family: 'Quantico';
     }
 
     .hero-section h2{
@@ -168,6 +168,52 @@
             width: 100%;
         }
     }
+
+    /* Hide the file input but keep it accessible */
+    #file-input {
+        position: absolute;
+        left: -9999px;
+    }
+
+    /* Styling for existing files list */
+    .existing-files {
+        margin-top: 20px;
+    }
+
+    .existing-file-item {
+        background-color: #2a2a3d;
+        padding: 10px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .existing-file-item img {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    .existing-file-item .file-name {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .existing-file-item .download-file {
+        color: #01cfbe;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+
+    .existing-file-item .delete-file {
+        color: #dc3545;
+        cursor: pointer;
+    }
 </style>
 
 <div class="hero-section">
@@ -183,14 +229,37 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops...',
-                        text: 'Terjadi kesalahan saat memperbarui proyek!',
-                        footer: '{{ implode('<br>', $errors->all()) }}'
+                        html: '{!! implode('<br>', $errors->all()) !!}'
                     });
                 });
             </script>
         @endif
 
-        <form action="{{ route('user.update', $project->id) }}" method="POST" enctype="multipart/form-data" id="edit-project-form">
+        @if(session('success'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire(
+                        'Success!',
+                        '{{ session('success') }}',
+                        'success'
+                    );
+                });
+            </script>
+        @endif
+
+        @if(session('error'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire(
+                        'Error!',
+                        '{{ session('error') }}',
+                        'error'
+                    );
+                });
+            </script>
+        @endif
+
+        <form action="{{ route('user.projects.update', $project->id) }}" method="POST" enctype="multipart/form-data" id="edit-project-form">
             @csrf
             @method('PUT')
             <div class="form-group">
@@ -199,41 +268,55 @@
             </div>
 
             <div class="form-group">
-                <label>Upload New File (optional)</label>
+                <label>Upload New Files (optional)</label>
                 <div class="dropzone" id="file-dropzone">
                     <i class="bi bi-upload"></i>
-                    <input type="file" id="file-input" name="file" style="display: none;">
-                    <p>Drag & drop file here or click to select</p>
+                    <input type="file" id="file-input" name="files[]" multiple>
+                    <p>Drag & drop files here or click to select</p>
                 </div>
-                <div class="file-preview" id="file-preview">
-                    @if($project->file_path)
-                        <div class="file-item" data-name="{{ basename($project->file_path) }}">
-                            @if(mime_content_type(storage_path('app/public/' . $project->file_path)) == 'image/jpeg' ||
-                                mime_content_type(storage_path('app/public/' . $project->file_path)) == 'image/png' ||
-                                mime_content_type(storage_path('app/public/' . $project->file_path)) == 'image/jpg')
-                                <img src="{{ Storage::url($project->file_path) }}" alt="File Image">
+                <div class="file-preview" id="file-preview"></div>
+            </div>
+
+            <!-- Daftar File yang Sudah Ada -->
+            <div class="form-group existing-files">
+                <label>Existing Files</label>
+                @if($project->files->count() > 0)
+                    <div class="mb-3">
+                        <a href="{{ route('user.projects.download', $project->id) }}" class="btn btn-success btn-sm" title="Download Semua File">
+                            <i class="bi bi-download"></i> Download All
+                        </a>
+                    </div>
+                    @foreach($project->files as $file)
+                        <div class="existing-file-item" data-id="{{ $file->id }}">
+                            @if(str_starts_with(mime_content_type(storage_path('app/public/' . $file->file_path)), 'image/'))
+                                <img src="{{ Storage::url($file->file_path) }}" alt="File Image">
                             @else
                                 <i class="bi bi-file-earmark"></i>
                             @endif
-                            <div class="file-name">{{ basename($project->file_path) }}</div>
-                            <i class="bi bi-x-circle remove-file" title="Remove File"></i>
+                            <div class="file-name">{{ basename($file->file_path) }}</div>
+                            <a href="{{ asset('storage/' . $file->file_path) }}" class="download-file" title="Download File" target="_blank">
+                                <i class="bi bi-download"></i>
+                            </a>
+                            <button type="button" class="delete-file btn btn-sm" title="Delete File">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
-                    @endif
-                </div>
+                    @endforeach
+                @else
+                    <p>-</p>
+                @endif
             </div>
 
-            @if($project->file_path)
-            <div class="form-group">
-                <p>Current File: <a href="{{ Storage::url($project->file_path) }}" target="_blank">View File</a></p>
+            <!-- Hidden Inputs untuk Menghapus File -->
+            <div id="deleted-files">
+                <!-- Diisi oleh JavaScript saat pengguna menghapus file -->
             </div>
-            @endif
 
             <!-- Submit Buttons -->
             <div class="tombol-aksi">
-                <button type="button" class="back-btn"><a href="{{ route('user.index') }}">Back</a></button>
+                <a href="{{ route('user.index') }}" class="back-btn">Back</a>
                 <button type="submit" class="submit-btn">Update Project</button>
             </div>
-
         </form>
     </div>
 </div>
@@ -243,6 +326,18 @@
         const dropzone = document.getElementById('file-dropzone');
         const fileInput = document.getElementById('file-input');
         const filePreview = document.getElementById('file-preview');
+        const deletedFilesContainer = document.getElementById('deleted-files');
+        const dataTransfer = new DataTransfer(); // Objek DataTransfer untuk mengelola file
+
+        // Fungsi untuk memuat ulang file yang sudah di-upload sebelumnya
+        function initializeExistingFiles() {
+            @foreach($project->files as $file)
+                // Jika perlu, Anda dapat menambahkan logika untuk menandai file existing agar tidak bentrok dengan file baru
+            @endforeach
+        }
+
+        // Inisialisasi jika diperlukan
+        initializeExistingFiles();
 
         // Handle drag over
         dropzone.addEventListener('dragover', (e) => {
@@ -276,22 +371,28 @@
             fileInput.value = ''; // Reset file input
         });
 
-        // Function to handle files
+        // Function untuk menangani file yang diupload
         function handleFiles(files) {
             files.forEach(file => {
-                // Since only one file is allowed, clear previous
-                filePreview.innerHTML = '';
+                // Cek apakah file sudah ditambahkan
+                if (document.querySelector(`.file-item[data-name="${file.name}"]`)) {
+                    Swal.fire('File Sudah Ditambahkan', `${file.name} sudah ditambahkan sebelumnya.`, 'info');
+                    return;
+                }
+
+                // Tambahkan file ke dataTransfer
+                dataTransfer.items.add(file);
 
                 const fileItem = document.createElement('div');
                 fileItem.classList.add('file-item');
                 fileItem.setAttribute('data-name', file.name);
 
-                // If file is image, show preview
+                // Jika file adalah gambar, tampilkan preview
                 if(file.type.startsWith('image/')) {
                     const img = document.createElement('img');
                     img.src = URL.createObjectURL(file);
                     img.onload = () => {
-                        URL.revokeObjectURL(img.src); // Free memory
+                        URL.revokeObjectURL(img.src); // Bebaskan memori
                     };
                     fileItem.appendChild(img);
                 } else {
@@ -308,26 +409,64 @@
 
                 const removeBtn = document.createElement('i');
                 removeBtn.classList.add('bi', 'bi-x-circle', 'remove-file');
-                removeBtn.title = 'Remove File';
+                removeBtn.title = 'Hapus File';
                 removeBtn.addEventListener('click', () => {
+                    // Hapus file dari dataTransfer
+                    for (let i = 0; i < dataTransfer.items.length; i++) {
+                        if (dataTransfer.items[i].getAsFile().name === file.name) {
+                            dataTransfer.items.remove(i);
+                            break;
+                        }
+                    }
+                    // Perbarui fileInput's files property
+                    fileInput.files = dataTransfer.files;
+
+                    // Hapus tampilan file dari UI
                     fileItem.remove();
-                    fileInput.value = ''; // Reset file input
                 });
                 fileItem.appendChild(removeBtn);
 
                 filePreview.appendChild(fileItem);
+
+                // Perbarui fileInput's files property
+                fileInput.files = dataTransfer.files;
             });
         }
 
-        // Optional: Handle form submission
-        const form = document.getElementById('edit-project-form');
-        form.addEventListener('submit', (e) => {
-            // Collect files from preview
-            const fileItems = document.querySelectorAll('.file-item');
-            if(fileItems.length > 1){
-                e.preventDefault();
-                Swal.fire('Error', 'Hanya diperbolehkan satu file per project.', 'error');
-            }
+        // Handle deletion of existing files
+        document.querySelectorAll('.delete-file').forEach(button => {
+            button.addEventListener('click', function(){
+                const fileItem = this.closest('.existing-file-item');
+                const fileId = fileItem.getAttribute('data-id');
+
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Anda akan menghapus file ini.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Tambahkan file ID ke input tersembunyi
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'deleted_files[]';
+                        hiddenInput.value = fileId;
+                        deletedFilesContainer.appendChild(hiddenInput);
+
+                        // Hapus tampilan file dari UI
+                        fileItem.remove();
+
+                        Swal.fire(
+                            'Terhapus!',
+                            'File telah dihapus.',
+                            'success'
+                        );
+                    }
+                });
+            });
         });
     });
 </script>

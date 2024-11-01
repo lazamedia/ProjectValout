@@ -34,7 +34,30 @@ Route::post('/login', [LoginController::class, 'authenticate' ] );
 Route::post('/logout', [LoginController::class, 'logout' ] );
 
 Route::resource('/user', UserDashboardController::class)->middleware('auth');
-Route::delete('user/bulk-delete', [UserDashboardController::class, 'bulkDelete'])->name('user.bulkDelete')->middleware('auth');
+Route::middleware(['auth'])->group(function () {
+    
+    // Rute untuk daftar proyek
+    Route::get('/user', [UserDashboardController::class, 'index'])->name('user.index');
+
+    // Rute untuk membuat proyek baru
+    Route::get('/user/projects/create', [UserDashboardController::class, 'create'])->name('user.create');
+    Route::post('/user/projects', [UserDashboardController::class, 'store'])->name('user.store');
+
+    // Rute untuk mengedit proyek
+    Route::get('/user/projects/{project}/edit', [UserDashboardController::class, 'edit'])->name('user.edit');
+    Route::put('/user/projects/{project}', [UserDashboardController::class, 'update'])->name('user.projects.update');
+
+
+    // Rute untuk menghapus proyek
+    Route::delete('/user/projects/{project}', [UserDashboardController::class, 'destroy'])->name('user.destroy');
+
+    // Rute untuk mengunduh semua file proyek
+    Route::get('/user/projects/{project}/download', [UserDashboardController::class, 'download'])->name('user.projects.download');
+
+    // Rute untuk bulk delete proyek
+    Route::delete('user/bulk-delete', [UserDashboardController::class, 'bulkDelete'])->name('user.projects.bulkDelete');
+});
+
 
 Route::post('/register', [RegisterController::class, 'register'])->name('register');
 

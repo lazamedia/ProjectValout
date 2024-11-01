@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('file_path')->nullable(); 
+            $table->string('tanggal')->nullable();
             $table->timestamps();
         });
     }

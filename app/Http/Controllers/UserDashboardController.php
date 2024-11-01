@@ -3,9 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\ProjectFile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+use ZipArchive;
+
 
 class UserDashboardController extends Controller
 {
@@ -15,11 +23,15 @@ class UserDashboardController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $user = Auth::user(); // Mendapatkan pengguna yang sedang diautentikasi
 
-        // Query projects dengan pencarian jika ada
-        $projects = Project::when($search, function ($query, $search) {
-            return $query->where('name', 'LIKE', "%{$search}%");
-        })->orderBy('created_at', 'desc')->paginate(10);
+        // Query proyek yang dimiliki oleh pengguna yang sedang diautentikasi
+        $projects = Project::where('user_id', $user->id)
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'LIKE', "%{$search}%");
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
         return view('user.index', compact('projects', 'search'));
     }
@@ -35,38 +47,58 @@ class UserDashboardController extends Controller
     /**
      * Store a newly created project in storage.
      */
+
     public function store(Request $request)
     {
         // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'files' => 'required',
+            'files.*' => 'file|max:2048',
         ]);
-
-        $filePath = null;
-
-        // Debug: Log apakah file di-upload
-        if ($request->hasFile('file')) {
-            Log::info('File ditemukan pada request.');
-
-            // Menggunakan storeAs untuk penamaan file yang unik
-            $fileName = time() . '_' . $request->file('file')->getClientOriginalName();
-            $filePath = $request->file('file')->storeAs('projects', $fileName, 'public');
-
-            // Debug: Log path file yang disimpan
-            Log::info('File disimpan di: ' . $filePath);
+    
+        // Pastikan pengguna diautentikasi
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->back()->withErrors('Pengguna tidak diautentikasi.');
+        }
+    
+        // Format tanggal dalam bahasa Indonesia
+        $tanggalSekarang = Carbon::now()->locale('id')->isoFormat('D MMMM YYYY'); 
+    
+        // Buat proyek baru dengan format tanggal
+        $project = Project::create([
+            'name' => $request->name,
+            'user_id' => $user->id,
+            'tanggal' => $tanggalSekarang, // Simpan tanggal dalam format yang diminta
+        ]);
+    
+        // Simpan setiap file dan hubungkan dengan proyek
+        if ($request->hasFile('files')) {
+            Log::info('Files ditemukan pada request.');
+            
+            foreach ($request->file('files') as $file) {
+                // Menggunakan nama file asli tanpa penambahan
+                $fileName = $file->getClientOriginalName();
+                $filePath = $file->storeAs('projects', $fileName, 'public');
+    
+                // Log path file yang disimpan
+                Log::info('File disimpan di: ' . $filePath);
+    
+                // Simpan data file ke tabel project_files
+                $project->files()->create([
+                    'file_path' => $filePath,
+                ]);
+            }
         } else {
             Log::info('Tidak ada file yang di-upload.');
         }
-
-        // Simpan data proyek ke database
-        Project::create([
-            'name' => $request->name,
-            'file_path' => $filePath,
-        ]);
-
+    
         return redirect()->route('user.index')->with('success', 'Project created successfully!');
     }
+    
+    
+    
 
     /**
      * Show the form for editing the specified project.
@@ -79,42 +111,57 @@ class UserDashboardController extends Controller
     /**
      * Update the specified project in storage.
      */
-    public function update(Request $request, Project $project)
+    public function update(Request $request, $id)
     {
+        // Temukan project berdasarkan ID
+        $project = Project::findOrFail($id);
+    
         // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'files.*' => 'nullable|file|mimes:jpeg,png,pdf,doc,docx,html,css,js|max:5120', // Sesuaikan mime types dan ukuran
+            'deleted_files.*' => 'nullable|integer|exists:files,id',
         ]);
-
-        // Debug: Log sebelum update
-        Log::info('Memulai proses update untuk proyek ID: ' . $project->id);
-
-        // Handle file update jika ada
-        if ($request->hasFile('file')) {
-            Log::info('File baru ditemukan pada request.');
-
-            // Hapus file lama jika ada
-            if ($project->file_path && Storage::disk('public')->exists($project->file_path)) {
-                Storage::disk('public')->delete($project->file_path);
-                Log::info('File lama dihapus: ' . $project->file_path);
-            }
-
-            // Simpan file baru
-            $fileName = time() . '_' . $request->file('file')->getClientOriginalName();
-            $filePath = $request->file('file')->storeAs('projects', $fileName, 'public');
-            $project->file_path = $filePath;
-
-            // Debug: Log path file yang disimpan
-            Log::info('File baru disimpan di: ' . $filePath);
-        }
-
-        // Update nama proyek
-        $project->name = $request->name;
+    
+        // Update nama project
+        $project->name = $request->input('name');
         $project->save();
-
-        return redirect()->route('user.index')->with('success', 'Project updated successfully!');
+    
+        // Proses penghapusan file yang dipilih
+        if ($request->has('deleted_files')) {
+            $deletedFileIds = $request->input('deleted_files');
+            foreach ($deletedFileIds as $fileId) {
+                $file = File::find($fileId);
+                if ($file) {
+                    // Hapus file dari storage
+                    Storage::delete('public/' . $file->file_path);
+                    // Hapus record dari database
+                    $file->delete();
+                }
+            }
+        }
+    
+        // Proses upload file baru
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $uploadedFile) {
+                // Menggunakan nama asli file untuk penyimpanan
+                $fileName = $uploadedFile->getClientOriginalName();
+                $path = $uploadedFile->storeAs('projects/' . $project->id, $fileName, 'public');
+    
+                // Simpan informasi file ke database
+                $project->files()->create([
+                    'file_path' => $path,
+                    'mime_type' => $uploadedFile->getClientMimeType(),
+                    'size' => $uploadedFile->getSize(),
+                    'original_name' => $fileName,
+                ]);
+            }
+        }
+    
+        return redirect()->route('user.index', $project->id)->with('success', 'Project updated successfully!');
     }
+    
+    
 
     /**
      * Remove the specified project from storage.
@@ -152,7 +199,56 @@ class UserDashboardController extends Controller
             $project->delete();
         }
     
-        return redirect()->back()->with('success', 'Data berhasil dihapus.');
+        return redirect()->route('user.index')->with('success', 'Project deleted successfully!');
     }
+
+
+    public function download(Project $project)
+    {
+        $user = Auth::user();
+    
+        // Pastikan pengguna memiliki akses ke proyek ini
+        if ($project->user_id !== $user->id) {
+            abort(403, 'Aksi tidak diizinkan.');
+        }
+    
+        $files = $project->files;
+    
+        if ($files->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada file untuk proyek ini.');
+        }
+    
+        // Sanitasi nama proyek untuk digunakan sebagai nama file ZIP
+        $projectNameSanitized = preg_replace('/[^A-Za-z0-9_\-]/', '_', $project->name);
+        $zipFileName = $projectNameSanitized . '.zip';
+        $zipFilePath = storage_path('app/temp/' . $zipFileName);
+    
+        // Pastikan direktori temp ada
+        if (!file_exists(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+    
+        // Inisialisasi ZipArchive
+        $zip = new ZipArchive();
+        if ($zip->open($zipFilePath, ZipArchive::CREATE) !== TRUE) {
+            return redirect()->back()->with('error', 'Gagal membuat file ZIP.');
+        }
+    
+        // Tambahkan setiap file ke dalam file ZIP
+        foreach ($files as $file) {
+            $filePath = storage_path('app/public/' . $file->file_path);
+            if (file_exists($filePath)) {
+                $relativeNameInZip = basename($filePath);
+                $zip->addFile($filePath, $relativeNameInZip);
+            }
+        }
+    
+        $zip->close();
+    
+        // Mengembalikan file ZIP sebagai respons unduhan dengan nama sesuai proyek, dan menghapus file ZIP setelah dikirim
+        return response()->download($zipFilePath, $zipFileName)->deleteFileAfterSend(true);
+    }
+    
+
     
 }

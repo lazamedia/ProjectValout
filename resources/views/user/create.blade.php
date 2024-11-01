@@ -14,7 +14,7 @@
     body {
         background-color: #111325;
         color: #f5f5f5;
-        font-family: 'tilt-neon', sans-serif;
+        font-family: 'Quantico';
     }
 
     .hero-section h2{
@@ -170,6 +170,12 @@
             width: 100%;
         }
     }
+
+    /* Hide the file input but keep it accessible */
+    #file-input {
+        position: absolute;
+        left: -9999px;
+    }
 </style>
 
 <div class="hero-section">
@@ -193,7 +199,7 @@
                 <label>Upload Files</label>
                 <div class="dropzone" id="file-dropzone">
                     <i class="bi bi-upload"></i>
-                    <input type="file" id="file-input" multiple style="display: none;">
+                    <input type="file" id="file-input" name="files[]" multiple>
                     <p>Drag & drop files here or click to select</p>
                 </div>
                 <div class="file-preview" id="file-preview"></div>
@@ -214,6 +220,7 @@
         const dropzone = document.getElementById('file-dropzone');
         const fileInput = document.getElementById('file-input');
         const filePreview = document.getElementById('file-preview');
+        const dataTransfer = new DataTransfer();
 
         // Handle drag over
         dropzone.addEventListener('dragover', (e) => {
@@ -256,6 +263,9 @@
                     return;
                 }
 
+                // Add file to dataTransfer
+                dataTransfer.items.add(file);
+
                 const fileItem = document.createElement('div');
                 fileItem.classList.add('file-item');
                 fileItem.setAttribute('data-name', file.name);
@@ -284,37 +294,27 @@
                 removeBtn.classList.add('bi', 'bi-x-circle', 'remove-file');
                 removeBtn.title = 'Remove File';
                 removeBtn.addEventListener('click', () => {
+                    // Remove file from dataTransfer
+                    for (let i = 0; i < dataTransfer.items.length; i++) {
+                        if (dataTransfer.items[i].getAsFile().name === file.name) {
+                            dataTransfer.items.remove(i);
+                            break;
+                        }
+                    }
+                    // Update the file input's files property
+                    fileInput.files = dataTransfer.files;
+
+                    // Remove the file item from the preview
                     fileItem.remove();
                 });
                 fileItem.appendChild(removeBtn);
 
                 filePreview.appendChild(fileItem);
+
+                // Update the file input's files property
+                fileInput.files = dataTransfer.files;
             });
         }
-
-        // Optional: Handle form submission
-        const form = document.getElementById('create-project-form');
-        form.addEventListener('submit', (e) => {
-            // Collect files from preview
-            const files = [];
-            const fileItems = document.querySelectorAll('.file-item');
-            fileItems.forEach(item => {
-                const fileName = item.getAttribute('data-name');
-                const file = Array.from(fileInput.files).find(f => f.name === fileName);
-                if(file){
-                    files.push(file);
-                }
-            });
-
-            // Append files to form data
-            if(files.length > 0){
-                const dataTransfer = new DataTransfer();
-                files.forEach(file => {
-                    dataTransfer.items.add(file);
-                });
-                fileInput.files = dataTransfer.files;
-            }
-        });
     });
 </script>
 

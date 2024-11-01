@@ -7,171 +7,7 @@
 <!-- Bootstrap Icons CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-<style>
-    /* Tema gelap */
-    body {
-        background-color: #111325;
-        color: #f5f5f5;
-        font-family: 'tilt-neon', sans-serif;
-    }
-    .hero-section h1{
-        margin: 0;
-        font-size: 31pt;
-    }
-    .hero-section h4{
-        margin: 0;
-        font-size: 14pt;
-    }
-    .hero-section{
-        padding: 20px;
-        margin-top: 50px;
-        min-height: 200px;
-    }
-    .table-dark{
-        background-color: #01cfbe00 !important;
-    }
-    .box-tabel {
-        padding: 20px;
-        box-sizing: border-box;
-        box-shadow: 0 8px 30px rgba(4, 187, 156, 0.1);
-    }
-
-    .table-dark th, .table-dark td {
-        color: #ffffff;
-        background-color: #01cfbe00;
-        font-size: 11pt;
-    }
-    
-    .table-dark .btn {
-        background-color: #4a4a4a96;
-        color: #ffffff;
-        border: none;
-    }
-
-    .btn-create, .btn-delete {
-        transition: all 0.3s ease;
-        border-radius: 2px;
-        font-size: 11pt;
-        padding: 3px 10px;
-    }
-
-    .btn-create:hover {
-        background-color: #28a74600;
-        color: #ffffff;
-        border: 1px solid #01cfbe;
-    }
-
-    .btn-delete:hover {
-        background-color: #dc3545;
-        color: #ffffff;
-    }
-
-    .hero-section {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-        text-align: center;
-    }
-    .form-check-input{
-        background-color: #01cfbe00;
-        border-color: #01cfbe;
-    }   
-    .form-check-input:focus {
-        box-shadow: 0 0 0 0.25rem rgba(1, 207, 190, 0);
-    }
-    .form-check-input:checked {
-        background-color: #01cfbe00;
-    }
-    .box-tabel h3 {
-        font-size: 14pt;
-    }
-    .header{
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        align-content: center;  
-    }
-    .action-box{
-        display: flex;
-        gap: 20px;
-        align-content: center;
-        align-items: center;
-    }
-    .input-box{
-        display: flex;
-        gap: 5px;
-    }
-    .header input{
-        width: 200px;
-        background-color: #01cfbe00;
-        border: 1px solid #01cfbe;
-        color: #ffffff;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 11pt;
-        height: 30px;
-    }
-    .header input:focus{
-        outline: none;
-        border: 1px solid #01cfbe;
-        box-shadow: 0 0 0 0.25rem rgba(1, 207, 190, 0);
-        background-color: #01cfbe00;
-        color: #f5f5f5;
-    }
-    .header input::placeholder{
-        color: #f5f5f59a;
-        font-size: 10pt;
-    }
-    /* Memisahkan tombol hapus dan tambah */
-    .action-box .bulk-delete-btn {
-        color: #f5f5f5;
-        font-size: 15pt;
-        display: none; /* Sembunyikan ikon hapus secara default */
-    }
-    .action-box .bulk-delete-btn.show {
-        display: inline; /* Tampilkan ikon hapus saat ada yang dipilih */
-    }
-    .action-box .add-btn{
-        color: #f5f5f5;
-        font-size: 15pt;
-        text-decoration: none;
-    }
-    .action-box .add-btn:hover{
-        color: #01cfbe;
-    }
-    .action-box .bulk-delete-btn:hover{
-        color: #dc3545;
-    }
-    /* Styling untuk pesan "Oops data tidak ada" */
-    .no-data {
-        text-align: center;
-        font-style: italic;
-        color: #f5f5f5;
-    }
-    @media (max-width: 780px) {
-        .hero-section{
-            padding: 10px;
-            min-height: 150px;
-        }
-        .hero-section h1{
-            font-size: 20pt;
-        }
-        .hero-section h4{
-            font-size: 12pt;
-        }
-        .hero-section p{
-            font-size: 10pt;
-            margin-top: 10px;
-        }
-        .header{
-            flex-direction: column;
-        }
-    }
-</style> 
+<link rel="stylesheet" href="{{ asset('css/user-home.css') }}">
 
 <div class="hero-section">
     <h4><span style="color: #01cfbe">Welcome,</span> {{ auth()->user()->nama }} </h4>
@@ -198,6 +34,18 @@
             </script>
         @endif
 
+        @if(session('error'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire(
+                        'Error!',
+                        '{{ session('error') }}',
+                        'error'
+                    );
+                });
+            </script>
+        @endif
+
         <div class="header">
             <h3>Data Project</h3>
             <div class="action-box">
@@ -208,15 +56,15 @@
                 </div>
             </div>
         </div>
-        <form id="bulk-delete-form" method="POST" action="{{ route('user.bulkDelete') }}">
+        <form id="bulk-delete-form" method="POST" action="{{ route('user.projects.bulkDelete') }}">
             @csrf
             @method('DELETE')
-            <table class="table table-dark table-hover table-responsive">
+            <table class="table table-dark table-hover table-responsive table-sm">
                 <thead>
                     <tr>
                         <th scope="col"><input class="form-check-input" type="checkbox" onclick="toggleCheckboxes(this)" title="Pilih Semua"></th>
                         <th scope="col">Nama Project</th>
-                        <th scope="col">Jenis File</th>
+                        <th scope="col">Tanggal Dibuat</th>
                         <th scope="col">Edit</th>
                     </tr>
                 </thead>
@@ -226,21 +74,20 @@
                             <td><input type="checkbox" class="form-check-input bulk-delete" name="ids[]" value="{{ $project->id }}"></td>
                             <td>{{ $project->name }}</td>
                             <td>
-                                @if($project->file_path)
-                                    {{ strtoupper(pathinfo($project->file_path, PATHINFO_EXTENSION)) }}
-                                @else
-                                    -
-                                @endif
+                                {{ $project->tanggal }}
                             </td>
                             <td>
-                                <a href="{{ route('user.edit', $project->id) }}" class="btn btn-info btn-sm">
+                                <a href="{{ route('user.edit', $project->id) }}" class="btn btn-info btn-sm" title="Edit Project">
                                     <i style="color: #01cfbe" class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="{{ route('user.projects.download', $project->id) }}" class="btn btn-success btn-sm" title="Download Semua File">
+                                    <i class="bi bi-download"></i>
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr id="no-data-row">
-                            <td colspan="5" class="no-data">Oops, data tidak ada</td>
+                            <td colspan="4" class="no-data">Oops, data tidak ada</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -356,7 +203,7 @@
             const noDataRow = document.createElement('tr');
             noDataRow.id = 'no-data-row';
             noDataRow.innerHTML = `
-                <td colspan="5" class="no-data">Oops, data tidak ada</td>
+                <td colspan="4" class="no-data">Oops, data tidak ada</td>
             `;
             tableBody.appendChild(noDataRow);
         }
