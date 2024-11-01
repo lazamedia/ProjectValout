@@ -17,7 +17,7 @@
         @csrf
         <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-in-left"></i> Log Out</button>
     </form>
-</div>
+</div> 
 
 <div class="container my-4">
     <!-- Tabel Data --> 
@@ -65,7 +65,7 @@
                         <th scope="col"><input class="form-check-input" type="checkbox" onclick="toggleCheckboxes(this)" title="Pilih Semua"></th>
                         <th scope="col">Nama Project</th>
                         <th scope="col">Tanggal Dibuat</th>
-                        <th scope="col">Edit</th>
+                        <th scope="col">Action</th>
                     </tr>
                 </thead>
                 <tbody id="table-body">

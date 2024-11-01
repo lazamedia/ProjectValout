@@ -30,6 +30,7 @@ body {
     color: #ffffff;
     background-color: #01cfbe00;
     font-size: 11pt;
+    padding: 8px;
 }
 
 .table-dark .btn {
