@@ -53,9 +53,8 @@
         @yield('content')
 
         {{-- Tampilkan hanya pada halaman home dan faq --}}
-        @if (request()->is('user') || request()->is('faq'))
-            @include('partials.sosmed')
-        @endif
+
+        @include('partials.sosmed')
 
     </div>
 
