@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Gate;
 use ZipArchive;
 
 
@@ -110,8 +110,13 @@ class UserDashboardController extends Controller
      */
     public function edit(Project $project)
     {
+        if (Gate::denies('update', $project)) {
+            abort(403, 'Akses tidak diizinkan.');
+        }
+    
         return view('user.edit', compact('project'));
     }
+    
 
     /**
      * Update the specified project in storage.
@@ -125,7 +130,7 @@ class UserDashboardController extends Controller
     // Validasi input
     $request->validate([
         'name' => 'required|string|max:255',
-        'files.*' => 'nullable|file|mimes:jpeg,png,pdf,doc,docx,html,css,js|max:5120',
+        'files.*' => 'nullable|file|max:5120',
         'deleted_files.*' => 'nullable|integer|exists:project_files,id',
     ]);
     

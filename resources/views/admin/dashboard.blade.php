@@ -52,14 +52,26 @@
 
         <div class="header">
             <h3>Data Project Semua User</h3>
-            <div class="action-box">
+            {{-- <div class="action-box">
                 <a href="{{ route('admin.projects.downloadAll') }}" class="btn btn-download-all" title="Download Semua Project">
                     <i class="bi bi-download"></i> All
                 </a>
                 <div class="input-box">
                     <input type="text" class="form-control" id="search-input" placeholder="Cari Data">
                 </div>
+            </div> --}}
+
+            <div class="action-box">
+                <!-- Tombol Download All dengan event JavaScript -->
+                <button id="btn-download-all" class="btn btn-download-all" title="Download Semua Project">
+                    <i class="bi bi-download"></i> All
+                </button>
+                <div class="input-box">
+                    <input type="text" class="form-control" id="search-input" placeholder="Cari Data">
+                </div>
             </div>
+
+            
         </div>
         
         <div class="table-responsive-wrapper">
@@ -148,6 +160,56 @@
             noDataRow.remove();
         }
     }
+
+
+
+    // 
+    document.getElementById('btn-download-all').addEventListener('click', function() {
+    Swal.fire({
+        title: 'Pilih Tanggal',
+        html: '<input type="date" id="download-date" class="swal2-input">',
+        showCancelButton: true,
+        confirmButtonText: 'Download',
+        cancelButtonText: 'Batal',
+        preConfirm: () => {
+            const downloadDate = document.getElementById('download-date').value;
+            if (!downloadDate) {
+                Swal.showValidationMessage('Silakan pilih tanggal');
+                return false;
+            }
+            return downloadDate;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const downloadDate = result.value;
+
+            // Kirim request AJAX untuk cek data
+            fetch(`{{ route('admin.projects.downloadAll') }}?date=${downloadDate}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    // Tampilkan notifikasi jika tidak ada data
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops!',
+                        text: data.error,
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    // Lanjutkan ke proses unduhan jika ada data
+                    window.location.href = `{{ route('admin.projects.downloadAll') }}?date=${downloadDate}`;
+                }
+            })
+            
+        }
+    });
+});
+
 </script>
 
 @endsection

@@ -215,6 +215,7 @@
         color: #dc3545;
         cursor: pointer;
     }
+
 </style>
 
 <div class="hero-section">
@@ -296,7 +297,7 @@
                             @endif
                             <div class="file-name">{{ basename($file->file_path) }}</div>
                             <a href="{{ asset('storage/' . $file->file_path) }}" class="download-file" title="Download File" target="_blank">
-                                <i class="bi bi-download"></i>
+                                <i class="bi bi-eye"></i>
                             </a>
                             <button type="button" class="delete-file btn btn-sm" title="Delete File">
                                 <i class="bi bi-trash"></i>
