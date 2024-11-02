@@ -62,42 +62,44 @@
             </div>
         </div>
         
-        
-        <table class="table table-dark table-hover table-responsive table-sm">
-            <thead>
-                <tr>
-                    <th scope="col">Nama User</th>
-                    <th scope="col">Nama Project</th>
-                    <th scope="col">Tanggal Dibuat</th>
-                    <th scope="col">Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                @forelse($projects as $project)
-                    <tr data-name="{{ strtolower($project->name) }}">
-                        <td>{{ $project->user->nama }}</td>
-                        <td>{{ $project->name ?? 'User Tidak Ditemukan' }}</td>
-                        <td>{{ $project->tanggal }}</td>
-                        <td>
-                            <a href="{{ route('user.edit', $project->id) }}" class="btn btn-info btn-sm" title="Edit Project">
-                                <i style="color: #01cfbe" class="bi bi-pencil-square"></i>
-                            </a>
-                            <a href="{{ route('user.projects.download', $project->id) }}" class="btn btn-success btn-sm" title="Download Semua File">
-                                <i class="bi bi-download"></i>
-                            </a>
-                        </td>
-                    </tr>
-                @empty
+        <div class="table-responsive-wrapper">
+            <table class="table table-dark table-hover table-responsive table-sm">
+                <thead>
                     <tr>
-                        <td colspan="4" class="no-data">Oops, data tidak ada</td>
+                        <th scope="col">Nama User</th>
+                        <th scope="col">Nama Project</th>
+                        <th scope="col">Tanggal Dibuat</th>
+                        <th scope="col">Aksi</th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
-
-        <div class="d-flex justify-content-center">
-            {{ $projects->links() }}
+                </thead>
+                <tbody id="table-body">
+                    @forelse($projects as $project)
+                        <tr data-name="{{ strtolower($project->name) }}">
+                            <td>{{ $project->user->nama }}</td>
+                            <td>{{ $project->name ?? 'User Tidak Ditemukan' }}</td>
+                            <td>{{ $project->tanggal }}</td>
+                            <td>
+                                <a href="{{ route('user.edit', $project->id) }}" class="btn btn-info btn-sm" title="Edit Project">
+                                    <i style="color: #01cfbe" class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="{{ route('user.projects.download', $project->id) }}" class="btn btn-success btn-sm" title="Download Semua File">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="no-data">Oops, data tidak ada</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+        
+        <div style="justify-content: right" class="d-flex ">
+            {{ $projects->links('pagination::bootstrap-4') }}
+        </div>
+        
     </div>
 </div>
 

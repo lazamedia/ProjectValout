@@ -63,6 +63,5 @@ Route::middleware(['auth:sanctum', RoleMiddleware::class . ':admin,super_admin']
     Route::resource('/admin', AdminDashboardController::class);
     Route::get('/admin/projects/download-all', [AdminDashboardController::class, 'downloadAllProjects'])->name('admin.projects.downloadAll');
 
-
 });
 

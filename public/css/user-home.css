@@ -172,3 +172,66 @@ body {
         padding: px;
     }
 }
+
+.pagination {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    padding: 10px 0;
+    list-style-type: none;
+}
+
+.pagination li {
+    margin: 0 5px;
+}
+
+.pagination li a, 
+.pagination li span {
+    display: inline-block;
+    padding: 8px 12px;
+    color: #01cfbe;
+    background-color: #f0f0f000;
+    border: 1px solid #01cfbe;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination li a:hover {
+    background-color: #01cfbe67;
+    border: 1px solid #06857a;
+    color: white;
+}
+
+.pagination .active span {
+    background-color: #01cfbe;
+    color: white;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+.pagination .disabled span {
+    color: #928b8b;
+    border: 1px solid #928b8b;
+    background-color: #e0e0e000;
+    pointer-events: none;
+}
+
+.table-responsive-wrapper {
+    overflow-x: auto; /* Mengaktifkan scroll horizontal */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling di perangkat mobile */
+    margin-bottom: 1rem;
+}
+
+.table-responsive-wrapper table {
+    min-width: 600px; /* Atur minimum width untuk mencegah tabel terlalu sempit */
+    white-space: nowrap; /* Mencegah teks pecah ke baris baru */
+}
+
+.table-responsive-wrapper th,
+.table-responsive-wrapper td {
+    white-space: nowrap; /* Mencegah teks di dalam sel memecah ke baris baru */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Tambahkan "..." jika teks terlalu panjang */
+}
