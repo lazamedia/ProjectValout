@@ -48,54 +48,59 @@ class UserDashboardController extends Controller
      * Store a newly created project in storage.
      */
 
-    public function store(Request $request)
-    {
-        // Validasi input
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'files' => 'required',
-            'files.*' => 'file|max:2048',
-        ]);
-    
-        // Pastikan pengguna diautentikasi
-        $user = Auth::user();
-        if (!$user) {
-            return redirect()->back()->withErrors('Pengguna tidak diautentikasi.');
-        }
-    
-        // Format tanggal dalam bahasa Indonesia
-        $tanggalSekarang = Carbon::now()->locale('id')->isoFormat('D MMMM YYYY'); 
-    
-        // Buat proyek baru dengan format tanggal
-        $project = Project::create([
-            'name' => $request->name,
-            'user_id' => $user->id,
-            'tanggal' => $tanggalSekarang, // Simpan tanggal dalam format yang diminta
-        ]);
-    
-        // Simpan setiap file dan hubungkan dengan proyek
-        if ($request->hasFile('files')) {
-            Log::info('Files ditemukan pada request.');
-            
-            foreach ($request->file('files') as $file) {
-                // Menggunakan nama file asli tanpa penambahan
-                $fileName = $file->getClientOriginalName();
-                $filePath = $file->storeAs('projects', $fileName, 'public');
-    
-                // Log path file yang disimpan
-                Log::info('File disimpan di: ' . $filePath);
-    
-                // Simpan data file ke tabel project_files
-                $project->files()->create([
-                    'file_path' => $filePath,
-                ]);
-            }
-        } else {
-            Log::info('Tidak ada file yang di-upload.');
-        }
-    
-        return redirect()->route('user.index')->with('success', 'Project created successfully!');
-    }
+     public function store(Request $request)
+     {
+         // Validasi input
+         $request->validate([
+             'name' => 'required|string|max:255',
+             'files' => 'required',
+             'files.*' => 'file|max:2048',
+         ]);
+     
+         // Pastikan pengguna diautentikasi
+         $user = Auth::user();
+         if (!$user) {
+             return redirect()->back()->withErrors('Pengguna tidak diautentikasi.');
+         }
+     
+         // Format tanggal dalam bahasa Indonesia
+         $tanggalSekarang = Carbon::now()->locale('id')->isoFormat('D MMMM YYYY'); 
+     
+         // Buat proyek baru dengan format tanggal
+         $project = Project::create([
+             'name' => $request->name,
+             'user_id' => $user->id,
+             'tanggal' => $tanggalSekarang,
+         ]);
+     
+         // Buat nama folder berdasarkan username, nama proyek, dan waktu pembuatan
+         $folderName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $user->username . '_' . $request->name) . '_' . Carbon::now()->format('Ymd_His');
+         $folderPath = 'projects/' . $folderName;
+     
+         // Simpan setiap file ke dalam folder proyek
+         if ($request->hasFile('files')) {
+             Log::info('Files ditemukan pada request.');
+             
+             foreach ($request->file('files') as $file) {
+                 // Menggunakan nama asli file untuk penyimpanan di dalam folder proyek
+                 $fileName = $file->getClientOriginalName();
+                 $filePath = $file->storeAs($folderPath, $fileName, 'public');
+     
+                 // Log path file yang disimpan
+                 Log::info('File disimpan di: ' . $filePath);
+     
+                 // Simpan data file ke tabel project_files
+                 $project->files()->create([
+                     'file_path' => $filePath,
+                 ]);
+             }
+         } else {
+             Log::info('Tidak ada file yang di-upload.');
+         }
+     
+         return redirect()->route('user.index')->with('success', 'Project created successfully!');
+     }
+     
     
     
     
@@ -112,54 +117,66 @@ class UserDashboardController extends Controller
      * Update the specified project in storage.
      */
     public function update(Request $request, $id)
-    {
-        // Temukan project berdasarkan ID
-        $project = Project::findOrFail($id);
+{
     
-        // Validasi input
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'files.*' => 'nullable|file|mimes:jpeg,png,pdf,doc,docx,html,css,js|max:5120', // Sesuaikan mime types dan ukuran
-            'deleted_files.*' => 'nullable|integer|exists:files,id',
-        ]);
+    // Temukan project berdasarkan ID
+    $project = Project::findOrFail($id);
     
-        // Update nama project
-        $project->name = $request->input('name');
-        $project->save();
+    // Validasi input
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'files.*' => 'nullable|file|mimes:jpeg,png,pdf,doc,docx,html,css,js|max:5120',
+        'deleted_files.*' => 'nullable|integer|exists:project_files,id',
+    ]);
     
-        // Proses penghapusan file yang dipilih
-        if ($request->has('deleted_files')) {
-            $deletedFileIds = $request->input('deleted_files');
-            foreach ($deletedFileIds as $fileId) {
-                $file = File::find($fileId);
-                if ($file) {
-                    // Hapus file dari storage
-                    Storage::delete('public/' . $file->file_path);
-                    // Hapus record dari database
-                    $file->delete();
-                }
-            }
-        }
+    // Update nama proyek
+    $project->name = $request->input('name');
+    $project->save();
     
-        // Proses upload file baru
-        if ($request->hasFile('files')) {
-            foreach ($request->file('files') as $uploadedFile) {
-                // Menggunakan nama asli file untuk penyimpanan
-                $fileName = $uploadedFile->getClientOriginalName();
-                $path = $uploadedFile->storeAs('projects/' . $project->id, $fileName, 'public');
-    
-                // Simpan informasi file ke database
-                $project->files()->create([
-                    'file_path' => $path,
-                    'mime_type' => $uploadedFile->getClientMimeType(),
-                    'size' => $uploadedFile->getSize(),
-                    'original_name' => $fileName,
-                ]);
-            }
-        }
-    
-        return redirect()->route('user.index', $project->id)->with('success', 'Project updated successfully!');
+    // Pastikan pengguna yang sedang login
+    $user = Auth::user();
+    if (!$user) {
+        return redirect()->back()->withErrors('Pengguna tidak diautentikasi.');
     }
+    
+    // Buat nama folder yang sama dengan format username_namaProject_waktu
+    $folderName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $user->username . '_' . $project->name) . '_' . Carbon::parse($project->created_at)->format('Ymd_His');
+    $folderPath = 'projects/' . $folderName;
+    
+    // Proses penghapusan file yang dipilih
+    if ($request->has('deleted_files')) {
+        $deletedFileIds = $request->input('deleted_files');
+        foreach ($deletedFileIds as $fileId) {
+            $file = ProjectFile::find($fileId);
+            if ($file) {
+                // Hapus file dari storage
+                Storage::disk('public')->delete($file->file_path);
+                // Hapus record dari database
+                $file->delete();
+            }
+        }
+    }
+    
+    // Proses upload file baru
+    if ($request->hasFile('files')) {
+        foreach ($request->file('files') as $uploadedFile) {
+            // Menggunakan nama asli file untuk penyimpanan di dalam folder proyek
+            $fileName = $uploadedFile->getClientOriginalName();
+            $filePath = $uploadedFile->storeAs($folderPath, $fileName, 'public');
+    
+            // Simpan informasi file ke database
+            $project->files()->create([
+                'file_path' => $filePath,
+                'mime_type' => $uploadedFile->getClientMimeType(),
+                'size' => $uploadedFile->getSize(),
+                'original_name' => $fileName,
+            ]);
+        }
+    }
+    
+    return redirect()->route('user.index', $project->id)->with('success', 'Project updated successfully!');
+}
+
     
     
 
@@ -190,17 +207,36 @@ class UserDashboardController extends Controller
             'ids.*' => 'exists:projects,id', // validasi ID yang ada di database
         ]);
     
-        // Hapus file yang terkait (jika ada) dan hapus record dari database
         foreach ($request->ids as $id) {
             $project = Project::findOrFail($id);
-            if ($project->file_path && file_exists(storage_path('app/' . $project->file_path))) {
-                unlink(storage_path('app/' . $project->file_path));
+            if ($project) {
+                // Menyimpan path folder proyek
+                $folderPath = 'projects/' . preg_replace('/[^A-Za-z0-9_\-]/', '_', $project->user->username . '_' . $project->name) . '_' . Carbon::parse($project->created_at)->format('Ymd_His');
+    
+                // Hapus semua file terkait proyek
+                foreach ($project->files as $file) {
+                    // Hapus file dari storage
+                    if (Storage::disk('public')->exists($file->file_path)) {
+                        Storage::disk('public')->delete($file->file_path);
+                    }
+                    // Hapus record file dari database
+                    $file->delete();
+                }
+    
+                // Hapus folder proyek jika ada
+                if (Storage::disk('public')->exists($folderPath)) {
+                    Storage::disk('public')->deleteDirectory($folderPath);
+                }
+    
+                // Hapus proyek dari database
+                $project->delete();
             }
-            $project->delete();
         }
     
-        return redirect()->route('user.index')->with('success', 'Project deleted successfully!');
+        return redirect()->route('user.index')->with('success', 'Projects deleted successfully!');
     }
+    
+
 
 
     public function download(Project $project)

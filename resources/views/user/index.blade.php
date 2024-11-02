@@ -50,7 +50,7 @@
             <h3>Data Project</h3>
             <div class="action-box">
                 <a href="#" id="bulk-delete-btn" class="bulk-delete-btn" title="Hapus Terpilih"><i class="bi bi-trash"></i></a>
-                <a href="{{ route('user.create') }}" class="add-btn" id="add-btn" title="Tambah Project"><i class="bi bi-plus-square-dotted"></i></a>
+                <a href="{{ route('user.create') }}" class="add-btn" id="add-btn" title="Tambah Project">Add  <i class="bi bi-plus"></i></a>
                 <div class="input-box">
                     <input type="text" class="form-control" id="search-input" placeholder="Cari Data">
                 </div>
