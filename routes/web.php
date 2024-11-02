@@ -62,8 +62,11 @@ Route::post('/register', [RegisterController::class, 'register'])->name('registe
 Route::middleware(['auth:sanctum', RoleMiddleware::class . ':admin,super_admin'])->group(function () {
     
     Route::resource('/admin', AdminDashboardController::class);
-    Route::get('/admin/projects/download-all', [AdminDashboardController::class, 'downloadAllProjects'])->name('admin.projects.downloadAll');
-    // Rute untuk mengedit proyek
+    // Rute untuk memeriksa data sebelum mengunduh
+    Route::get('/admin/projects/check-download', [AdminDashboardController::class, 'checkDownload'])->name('admin.projects.checkDownload');
+
+    // Rute untuk mengunduh semua proyek
+    Route::get('/admin/projects/download-all', [AdminDashboardController::class, 'downloadAllProjects'])->name('admin.projects.downloadAll');    // Rute untuk mengedit proyek
     Route::get('/admin/projects/{project}/edit', [AdminDashboardController::class, 'edit'])->name('admin.edit');
     Route::put('/admin/projects/{project}', [AdminDashboardController::class, 'update'])->name('admin.projects.update');
 

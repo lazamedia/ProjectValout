@@ -38,16 +38,24 @@ class AdminDashboardController extends Controller
         return view('admin.dashboard', compact('projects', 'search'));
     }
 
-    public function downloadAllProjects(Request $request)
+
+
+    // App\Http\Controllers\AdminDashboardController.php
+
+public function checkDownload(Request $request)
 {
     $date = $request->query('date');
 
+    // Validasi apakah tanggal sudah dipilih
     if (!$date) {
         return response()->json(['error' => 'Tanggal harus dipilih.'], 400);
     }
 
-    // Konversi tanggal ke format "d F Y" (misalnya, "2 November 2024")
+    // Set locale ke Indonesia
+    Carbon::setLocale('id');
+
     try {
+        // Konversi tanggal ke format "j F Y" (misalnya, "2 November 2024")
         $formattedDate = Carbon::parse($date)->translatedFormat('j F Y');
     } catch (\Exception $e) {
         Log::error('Kesalahan saat mem-parsing tanggal: ' . $e->getMessage());
@@ -55,7 +63,9 @@ class AdminDashboardController extends Controller
     }
 
     // Ambil semua proyek berdasarkan format tanggal yang sesuai
-    $projects = Project::with('user', 'files')->where('tanggal', 'LIKE', "%{$formattedDate}%")->get();
+    $projects = Project::with('user', 'files')
+        ->where('tanggal', 'LIKE', "%{$formattedDate}%")
+        ->get();
 
     Log::info("Jumlah proyek ditemukan pada tanggal $formattedDate: " . $projects->count());
 
@@ -63,20 +73,63 @@ class AdminDashboardController extends Controller
         return response()->json(['error' => 'Tidak ada data pada tanggal tersebut.'], 404);
     }
 
+    return response()->json(['success' => true]);
+}
+
+
+
+
+    // App\Http\Controllers\AdminDashboardController.php
+
+public function downloadAllProjects(Request $request)
+{
+    $date = $request->query('date');
+
+    // Validasi apakah tanggal sudah dipilih
+    if (!$date) {
+        return redirect()->back()->with('error', 'Tanggal harus dipilih.');
+    }
+
+    // Set locale ke Indonesia
+    Carbon::setLocale('id');
+
+    try {
+        // Konversi tanggal ke format "j F Y" (misalnya, "2 November 2024")
+        $formattedDate = Carbon::parse($date)->translatedFormat('j F Y');
+    } catch (\Exception $e) {
+        Log::error('Kesalahan saat mem-parsing tanggal: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Format tanggal tidak valid.');
+    }
+
+    // Ambil semua proyek berdasarkan format tanggal yang sesuai
+    $projects = Project::with('user', 'files')
+        ->where('tanggal', 'LIKE', "%{$formattedDate}%")
+        ->get();
+
+    Log::info("Jumlah proyek ditemukan pada tanggal $formattedDate: " . $projects->count());
+
+    if ($projects->isEmpty()) {
+        return redirect()->back()->with('error', 'Tidak ada data pada tanggal tersebut.');
+    }
+
     $zipFileName = 'projects_' . str_replace(' ', '_', $formattedDate) . '.zip';
     $zipFilePath = storage_path('app/temp/' . $zipFileName);
 
+    // Buat direktori temp jika belum ada
     if (!file_exists(storage_path('app/temp'))) {
         mkdir(storage_path('app/temp'), 0755, true);
     }
 
+    // Inisialisasi ZipArchive
     $zip = new ZipArchive();
     if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
-        return response()->json(['error' => 'Gagal membuat file ZIP.'], 500);
+        return redirect()->back()->with('error', 'Gagal membuat file ZIP.');
     }
 
+    // Tambahkan file proyek ke dalam ZIP
     foreach ($projects as $project) {
         $userFolder = $project->user->username . '_' . $project->name;
+
         foreach ($project->files as $file) {
             $filePath = storage_path('app/public/' . $file->file_path);
             if (file_exists($filePath)) {
@@ -88,8 +141,13 @@ class AdminDashboardController extends Controller
 
     $zip->close();
 
-    return response()->download($zipFilePath)->deleteFileAfterSend(true);
+    // Kembalikan file ZIP sebagai respons unduhan
+    return response()->download($zipFilePath, $zipFileName)->deleteFileAfterSend(true);
 }
+
+
+
+
 
 
     public function edit(Project $project)

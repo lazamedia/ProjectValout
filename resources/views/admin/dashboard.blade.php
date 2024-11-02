@@ -1,3 +1,5 @@
+<!-- resources/views/admin/dashboard.blade.php -->
+
 @extends('layouts.main')
 
 @section('content')
@@ -11,11 +13,11 @@
 
 <style>
     .btn-download-all {
-    background-color: #01cfbe00;
-    border: 1px solid #01cfbe;
-    color: #01cfbe;
-    font-size: 9pt;
-    margin-right: 10px;
+        background-color: #01cfbe00;
+        border: 1px solid #01cfbe;
+        color: #01cfbe;
+        font-size: 9pt;
+        margin-right: 10px;
     }
 
     .btn-download-all:hover {
@@ -57,8 +59,6 @@
     .custom-swal-cancel-button:hover {
         background-color: #555 !important; /* Warna tombol batal saat hover */
     }
-
-
 </style>
 
 <div class="hero-section">
@@ -86,17 +86,20 @@
             </script>
         @endif
 
+        @if(session('error'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire(
+                        'Error!',
+                        '{{ session('error') }}',
+                        'error'
+                    );
+                });
+            </script>
+        @endif
+
         <div class="header">
             <h3>Data Project Semua User</h3>
-            {{-- <div class="action-box">
-                <a href="{{ route('admin.projects.downloadAll') }}" class="btn btn-download-all" title="Download Semua Project">
-                    <i class="bi bi-download"></i> All
-                </a>
-                <div class="input-box">
-                    <input type="text" class="form-control" id="search-input" placeholder="Cari Data">
-                </div>
-            </div> --}}
-
             <div class="action-box">
                 <!-- Tombol Download All dengan event JavaScript -->
                 <button id="btn-download-all" class="btn btn-download-all" title="Download Semua Project">
@@ -106,8 +109,6 @@
                     <input type="text" class="form-control" id="search-input" placeholder="Cari Data">
                 </div>
             </div>
-
-            
         </div>
         
         <div class="table-responsive-wrapper">
@@ -198,90 +199,79 @@
         }
     }
 
-
-
-    // 
+    // Handle Download All Button Click
     document.getElementById('btn-download-all').addEventListener('click', function() {
-    Swal.fire({
-        title: 'Pilih Tanggal',
-        html: '<input type="date" id="download-date" class="swal2-input">',
-        showCancelButton: true,
-        confirmButtonText: 'Download',
-        cancelButtonText: 'Batal',
-        customClass: {
-            popup: 'custom-swal-popup', // Kelas khusus untuk popup
-            confirmButton: 'custom-swal-confirm-button', // Kelas khusus untuk tombol konfirmasi
-            cancelButton: 'custom-swal-cancel-button' // Kelas khusus untuk tombol batal
-        },
-        preConfirm: () => {
-            const downloadDate = document.getElementById('download-date').value;
-            if (!downloadDate) {
-                Swal.showValidationMessage('Silakan pilih tanggal');
-                return false;
+        Swal.fire({
+            title: 'Pilih Tanggal',
+            html: '<input type="date" id="download-date" class="swal2-input">',
+            showCancelButton: true,
+            confirmButtonText: 'Download',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'custom-swal-popup', // Kelas khusus untuk popup
+                confirmButton: 'custom-swal-confirm-button', // Kelas khusus untuk tombol konfirmasi
+                cancelButton: 'custom-swal-cancel-button' // Kelas khusus untuk tombol batal
+            },
+            preConfirm: () => {
+                const downloadDate = document.getElementById('download-date').value;
+                if (!downloadDate) {
+                    Swal.showValidationMessage('Silakan pilih tanggal');
+                    return false;
+                }
+                return downloadDate;
             }
-            return downloadDate;
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const downloadDate = result.value;
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const downloadDate = result.value;
 
-            // Lakukan permintaan AJAX untuk memeriksa apakah data tersedia
-            fetch(`{{ route('admin.projects.downloadAll') }}?date=${downloadDate}`, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    // Tampilkan SweetAlert jika terjadi error
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Oops!',
-                        text: data.error,
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            popup: 'custom-swal-popup',
-                            confirmButton: 'custom-swal-confirm-button'
-                        }
-                    });
-                } else {
-                    // Jika tidak ada error, tampilkan SweetAlert dan arahkan untuk mengunduh
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: 'Unduhan akan dimulai...',
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            popup: 'custom-swal-popup',
-                            confirmButton: 'custom-swal-confirm-button'
-                        }
-                    }).then(() => {
-                        window.location.href = `{{ route('admin.projects.downloadAll') }}?date=${downloadDate}`;
-                    });
-                }
-            })
-            .catch(error => {
-                // Tampilkan SweetAlert jika terjadi error saat proses AJAX
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Terjadi Kesalahan!',
-                    text: 'Ada kesalahan dalam permintaan. Silakan coba lagi.',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        confirmButton: 'custom-swal-confirm-button'
+                // Kirim permintaan AJAX ke checkDownload
+                fetch(`{{ route('admin.projects.checkDownload') }}?date=${downloadDate}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.error || 'Terjadi kesalahan.'); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Tampilkan SweetAlert sukses
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Unduhan akan dimulai...',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                popup: 'custom-swal-popup',
+                                confirmButton: 'custom-swal-confirm-button'
+                            }
+                        }).then(() => {
+                            // Inisiasi pengunduhan dengan mengarahkan ke rute unduhan
+                            window.location.href = `{{ route('admin.projects.downloadAll') }}?date=${downloadDate}`;
+                        });
+                    }
+                })
+                .catch(error => {
+                    // Tampilkan SweetAlert error
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi Kesalahan!',
+                        text: error.message,
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm-button'
+                        }
+                    });
+                    console.error('Error:', error);
                 });
-                console.error('Error:', error);
-            });
-        }
+            }
+        });
     });
-});
-
-
-
 </script>
 
 @endsection
