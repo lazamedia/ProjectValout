@@ -6,6 +6,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Middleware\RoleMiddleware;
+use App\Models\Admin;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -62,6 +63,13 @@ Route::middleware(['auth:sanctum', RoleMiddleware::class . ':admin,super_admin']
     
     Route::resource('/admin', AdminDashboardController::class);
     Route::get('/admin/projects/download-all', [AdminDashboardController::class, 'downloadAllProjects'])->name('admin.projects.downloadAll');
+    // Rute untuk mengedit proyek
+    Route::get('/admin/projects/{project}/edit', [AdminDashboardController::class, 'edit'])->name('admin.edit');
+    Route::put('/admin/projects/{project}', [AdminDashboardController::class, 'update'])->name('admin.projects.update');
+
+
+    // Rute untuk menghapus proyek
+    Route::delete('/admin/projects/{project}', [AdminDashboardController::class, 'destroy'])->name('admin.destroy');
 
 });
 

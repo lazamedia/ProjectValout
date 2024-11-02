@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\ProjectFile;
 use Illuminate\Http\Request;
-use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use ZipArchive;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Gate;
+use ZipArchive;
 
 
 class AdminDashboardController extends Controller
@@ -21,7 +25,7 @@ class AdminDashboardController extends Controller
         $search = $request->input('search');
 
         // Mendapatkan semua proyek dengan informasi user
-        $projects = Project::with('user')
+        $projects = Project::with('user') 
             ->when($search, function ($query, $search) {
                 return $query->where('name', 'LIKE', "%{$search}%")
                              ->orWhereHas('user', function ($query) use ($search) {
@@ -90,6 +94,91 @@ class AdminDashboardController extends Controller
     return response()->download($zipFilePath)->deleteFileAfterSend(true);
 }
 
+
+    public function edit(Project $project)
+    {
+        return view('user.edit', compact('project'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        
+        // Temukan project berdasarkan ID
+        $project = Project::findOrFail($id);
+        
+        // Validasi input
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'files.*' => 'nullable|file|max:5120',
+            'deleted_files.*' => 'nullable|integer|exists:project_files,id',
+        ]);
+        
+        // Update nama proyek
+        $project->name = $request->input('name');
+        $project->save();
+        
+        // Pastikan pengguna yang sedang login
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->back()->withErrors('Pengguna tidak diautentikasi.');
+        }
+        
+        // Buat nama folder yang sama dengan format username_namaProject_waktu
+        $folderName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $user->username . '_' . $project->name) . '_' . Carbon::parse($project->created_at)->format('Ymd_His');
+        $folderPath = 'projects/' . $folderName;
+        
+        // Proses penghapusan file yang dipilih
+        if ($request->has('deleted_files')) {
+            $deletedFileIds = $request->input('deleted_files');
+            foreach ($deletedFileIds as $fileId) {
+                $file = ProjectFile::find($fileId);
+                if ($file) {
+                    // Hapus file dari storage
+                    Storage::disk('public')->delete($file->file_path);
+                    // Hapus record dari database
+                    $file->delete();
+                }
+            }
+        }
+        
+        // Proses upload file baru
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $uploadedFile) {
+                // Menggunakan nama asli file untuk penyimpanan di dalam folder proyek
+                $fileName = $uploadedFile->getClientOriginalName();
+                $filePath = $uploadedFile->storeAs($folderPath, $fileName, 'public');
+        
+                // Simpan informasi file ke database
+                $project->files()->create([
+                    'file_path' => $filePath,
+                    'mime_type' => $uploadedFile->getClientMimeType(),
+                    'size' => $uploadedFile->getSize(),
+                    'original_name' => $fileName,
+                ]);
+            }
+        }
+        
+        return redirect()->route('admin.dashboard', $project->id)->with('success', 'Project updated successfully!');
+    }
+    
+        
+        
+    
+        /**
+         * Remove the specified project from storage.
+         */
+        public function destroy(Project $project)
+        {
+            // Hapus file jika ada
+            if ($project->file_path && Storage::disk('public')->exists($project->file_path)) {
+                Storage::disk('public')->delete($project->file_path);
+                Log::info('File dihapus saat menghapus proyek ID: ' . $project->id);
+            }
+    
+            $project->delete();
+    
+            return redirect()->route('admin.dashboard')->with('success', 'Project deleted successfully!');
+        }
 
 
 }
