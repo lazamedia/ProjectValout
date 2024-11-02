@@ -77,12 +77,13 @@
     <div class="container">
         <div class="box">
             <img src="img/mt.png" lazy='loader' class="img-404" alt="">
-            <h1>503 - Website sedang dalam maintenance</h1>
+            <h1>Website sedang dalam maintenance</h1>
             <p>Kami akan kembali secepatnya. Terima kasih atas kesabaran Anda!</p>
+            <p style="font-size:9pt;">Developed by.lazz</p>
             <ul class="mtn-icons">
             <li><a href="https://wa.me/6282134749670" target="_blank"><i class="fab fa-whatsapp"></i></a></li>
-            <li><a href="https://www.instagram.com/pripnuippnu.pujut01/" target="_blank"><i class="fab fa-instagram"></i></a></li>
-            <li><a href="mailto:your-email@example.com" target="_blank"><i class="fas fa-envelope"></i></a></li>
+            <li><a href="https://www.instagram.com/lazuardi_mixu/" target="_blank"><i class="fab fa-instagram"></i></a></li>
+            <li><a href="mailto:lazamediamxt@gmail.com" target="_blank"><i class="fas fa-envelope"></i></a></li>
         </ul>
         </div>
     </div>
