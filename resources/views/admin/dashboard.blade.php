@@ -209,9 +209,9 @@
         confirmButtonText: 'Download',
         cancelButtonText: 'Batal',
         customClass: {
-            popup: 'custom-swal-popup', // Tambahkan kelas khusus untuk popup
-            confirmButton: 'custom-swal-confirm-button', // Tambahkan kelas khusus untuk tombol konfirmasi
-            cancelButton: 'custom-swal-cancel-button' // Tambahkan kelas khusus untuk tombol batal
+            popup: 'custom-swal-popup', // Kelas khusus untuk popup
+            confirmButton: 'custom-swal-confirm-button', // Kelas khusus untuk tombol konfirmasi
+            cancelButton: 'custom-swal-cancel-button' // Kelas khusus untuk tombol batal
         },
         preConfirm: () => {
             const downloadDate = document.getElementById('download-date').value;
@@ -224,6 +224,8 @@
     }).then((result) => {
         if (result.isConfirmed) {
             const downloadDate = result.value;
+
+            // Lakukan permintaan AJAX untuk memeriksa apakah data tersedia
             fetch(`{{ route('admin.projects.downloadAll') }}?date=${downloadDate}`, {
                 method: 'GET',
                 headers: {
@@ -233,6 +235,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
+                    // Tampilkan SweetAlert jika terjadi error
                     Swal.fire({
                         icon: 'warning',
                         title: 'Oops!',
@@ -244,12 +247,39 @@
                         }
                     });
                 } else {
-                    window.location.href = `{{ route('admin.projects.downloadAll') }}?date=${downloadDate}`;
+                    // Jika tidak ada error, tampilkan SweetAlert dan arahkan untuk mengunduh
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Unduhan akan dimulai...',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm-button'
+                        }
+                    }).then(() => {
+                        window.location.href = `{{ route('admin.projects.downloadAll') }}?date=${downloadDate}`;
+                    });
                 }
+            })
+            .catch(error => {
+                // Tampilkan SweetAlert jika terjadi error saat proses AJAX
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan!',
+                    text: 'Ada kesalahan dalam permintaan. Silakan coba lagi.',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        confirmButton: 'custom-swal-confirm-button'
+                    }
+                });
+                console.error('Error:', error);
             });
         }
     });
 });
+
 
 
 </script>
