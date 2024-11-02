@@ -110,12 +110,16 @@ class UserDashboardController extends Controller
      */
     public function edit(Project $project)
     {
-        if (Gate::denies('update', $project)) {
-            abort(403, 'Akses tidak diizinkan.');
+        $user = Auth::user();
+    
+        // Tetap gunakan Gate tetapi izinkan admin tanpa cek Gate
+        if ($user->role === 'admin' || Gate::allows('update', $project)) {
+            return view('user.edit', compact('project'));
         }
     
-        return view('user.edit', compact('project'));
+        abort(403, 'Akses tidak diizinkan.');
     }
+    
     
 
     /**
