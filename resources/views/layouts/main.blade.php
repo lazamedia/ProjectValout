@@ -42,7 +42,7 @@
 
 </head>
 
-<body class="body--no-scroll">
+<body class="body--no-scroll">  
     <!-- Include Navbar Partial -->
     @include('partials.navbar')
 
