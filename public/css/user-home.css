@@ -153,7 +153,7 @@ body {
     color: #f5f5f5;
 }
 .spacer{
-    min-height: 300px;
+    min-height: 10px;
 }
 @media (max-width: 780px) {
     .hero-section{
