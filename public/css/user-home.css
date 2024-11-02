@@ -4,6 +4,7 @@ body {
     color: #f5f5f5;
     font-family: 'Quantico';
 }
+
 .hero-section h1{
     margin: 0;
     font-size: 31pt;
@@ -20,9 +21,10 @@ body {
 .table-dark{
     background-color: #01cfbe00 !important;
 }
-.box-tabel {
+.box-tabel { 
     padding: 20px;
     box-sizing: border-box;
+    margin-bottom: 300px;
     box-shadow: 0 8px 30px rgba(4, 187, 156, 0.1);
 }
 

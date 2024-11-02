@@ -34,7 +34,7 @@
         right: 20px;
         width: 50px;
         height: 50px;
-        background-color: #01cfbe6b;
+        background-color: #112b3dc0;
         border: 1px solid #01cfbe;
         color: #172433;
         border-radius: 50%;

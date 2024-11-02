@@ -62,7 +62,7 @@
 </style>
 
 <div class="hero-section">
-    <h4><span style="color: #01cfbe">Welcome,</span> Admin </h4>
+    <h4><font style="color: #01cfbe">Welcome,</font> Admin </h4>
     <h1>Dashboard <span style="color: #01cfbe" id="dynamic-title">Semua Project Pengguna</span></h1>
     <p>Web ini khusus untuk pengelolaan project oleh Admin</p>
     <form action="/logout" method="post">
