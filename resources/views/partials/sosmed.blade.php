@@ -27,6 +27,39 @@
         color: #01fce7 !important;
     }
 
+    /* Scroll-to-Top Button */
+    .scroll-top-button {
+        position: fixed;
+        bottom: 80px; /* Positioned above the Home button */
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background-color: #01cfbe6b;
+        border: 1px solid #01cfbe;
+        color: #172433;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 1001; /* Ensure it appears above the Home button */
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .scroll-top-button.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .scroll-top-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(3, 142, 160, 0.3);
+        border: #0A74DA;
+    }
+
     /* Social Icons Container */
     .social-icons {
         position: fixed;
@@ -152,6 +185,12 @@
     <i class="bi bi-house-fill text-white" style="font-size: 24px;"></i>
 </div>
 
+<!-- Scroll-to-Top Button -->
+<div class="scroll-top-button" id="scrollTopButton" onclick="scrollToTop()">
+    <!-- Arrow-up Icon -->
+    <i class="bi bi-arrow-up-short text-white" style="font-size: 24px;"></i>
+</div>
+
 <!-- Social Icons -->
 <div class="social-icons" id="socialIcons">
     <!-- Discord Icon -->
@@ -173,12 +212,6 @@
     <div class="social-icon phone" onclick="showPopup()">
         <i class="bi bi-exclamation-circle" style="font-size: 24px;"></i>
     </div>
-</div>
-
-<!-- Scroll-to-Top Button -->
-<div class="scroll-top-button" id="scrollTopButton" onclick="scrollToTop()">
-    <!-- Arrow-up Icon -->
-    <i class="bi bi-arrow-up-short text-white" style="font-size: 24px;"></i>
 </div>
 
 <!-- Popup Overlay -->
@@ -204,21 +237,15 @@
         socialIcons.classList.toggle('show');
     }
 
-    // Redirect to WhatsApp chat
+    // Redirect to Discord
     function redirectToDiscord() {
-        var url = 'https://discord.gg/VWbeeYf7Xr' ;
+        var url = 'https://discord.gg/VWbeeYf7Xr';
         window.open(url, '_blank');
     }
 
     // Redirect to Instagram
     function redirectToInstagram() {
-        var url = 'https://www.instagram.com/ukm_cyber'; // replace with your Instagram link
-        window.open(url, '_blank');
-    }
-
-    // Redirect to a generic link
-    function redirectToLink() {
-        var url = 'https://yourlink.com'; // replace with your desired link
+        var url = 'https://www.instagram.com/ukm_cyber';
         window.open(url, '_blank');
     }
 

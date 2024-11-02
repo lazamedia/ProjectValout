@@ -23,6 +23,42 @@
         color: #020829;
     }
 
+    /* Custom SweetAlert Background */
+    .custom-swal-popup {
+        background-color: #172433 !important; /* Latar belakang SweetAlert */
+        color: #ffffff; /* Warna teks SweetAlert */
+        border: 1px solid #01cfbe;
+    }
+
+    /* Custom Confirm Button */
+    .custom-swal-confirm-button {
+        background-color: #01cfbe !important; /* Warna tombol konfirmasi */
+        color: #020829 !important;
+        border: none;
+        padding: 10px 15px;
+        font-weight: bold;
+        font-size: 10pt;
+    }
+
+    .custom-swal-confirm-button:hover {
+        background-color: #019e98 !important; /* Warna tombol saat hover */
+    }
+
+    /* Custom Cancel Button */
+    .custom-swal-cancel-button {
+        background-color: #333 !important; /* Warna tombol batal */
+        color: #ffffff !important;
+        border: none;
+        padding: 10px 15px;
+        font-weight: bold;
+        font-size: 10pt;
+    }
+
+    .custom-swal-cancel-button:hover {
+        background-color: #555 !important; /* Warna tombol batal saat hover */
+    }
+
+
 </style>
 
 <div class="hero-section">
@@ -171,6 +207,11 @@
         showCancelButton: true,
         confirmButtonText: 'Download',
         cancelButtonText: 'Batal',
+        customClass: {
+            popup: 'custom-swal-popup', // Tambahkan kelas khusus untuk popup
+            confirmButton: 'custom-swal-confirm-button', // Tambahkan kelas khusus untuk tombol konfirmasi
+            cancelButton: 'custom-swal-cancel-button' // Tambahkan kelas khusus untuk tombol batal
+        },
         preConfirm: () => {
             const downloadDate = document.getElementById('download-date').value;
             if (!downloadDate) {
@@ -182,8 +223,6 @@
     }).then((result) => {
         if (result.isConfirmed) {
             const downloadDate = result.value;
-
-            // Kirim request AJAX untuk cek data
             fetch(`{{ route('admin.projects.downloadAll') }}?date=${downloadDate}`, {
                 method: 'GET',
                 headers: {
@@ -193,22 +232,24 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    // Tampilkan notifikasi jika tidak ada data
                     Swal.fire({
                         icon: 'warning',
                         title: 'Oops!',
                         text: data.error,
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm-button'
+                        }
                     });
                 } else {
-                    // Lanjutkan ke proses unduhan jika ada data
                     window.location.href = `{{ route('admin.projects.downloadAll') }}?date=${downloadDate}`;
                 }
-            })
-            
+            });
         }
     });
 });
+
 
 </script>
 
