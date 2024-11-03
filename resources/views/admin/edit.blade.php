@@ -316,7 +316,7 @@
 
             <!-- Submit Buttons -->
             <div class="tombol-aksi">
-                <a href="{{ route('admin.index') }}" class="back-btn">Back</a>
+                <a href="{{ route('admin.dashboard') }}" class="back-btn">Kembali</a>
                 <button type="submit" class="submit-btn">Update Project</button>
             </div>
         </form>

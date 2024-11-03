@@ -59,6 +59,19 @@
     .custom-swal-cancel-button:hover {
         background-color: #555 !important; /* Warna tombol batal saat hover */
     }
+    .box-pagination{
+        align-content: center;
+        justify-content: space-between;
+        align-items: center;
+    }
+    @media (max-width:780px){
+        .box-pagination{
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            justify-content: right;
+        }
+    }
 </style>
 
 <div class="hero-section">
@@ -99,7 +112,7 @@
         @endif
 
         <div class="header">
-            <h3>Data Project Semua User</h3>
+            <h3 class="mb-2">Data Project Semua User</h3>
             <div class="action-box">
                 <!-- Tombol Download All dengan event JavaScript -->
                 <button id="btn-download-all" class="btn btn-download-all" title="Download Semua Project">
@@ -115,6 +128,7 @@
             <table class="table table-dark table-hover table-responsive table-sm">
                 <thead>
                     <tr>
+                        <th scope="col">#</th> <!-- Kolom untuk nomor -->
                         <th scope="col">Nama User</th>
                         <th scope="col">Nama Project</th>
                         <th scope="col">Tanggal Dibuat</th>
@@ -122,8 +136,9 @@
                     </tr>
                 </thead>
                 <tbody id="table-body">
-                    @forelse($projects as $project)
+                    @forelse($projects as $index => $project)
                         <tr data-name="{{ strtolower($project->name) }}">
+                            <td>{{ $projects->firstItem() + $index }}</td> <!-- Menampilkan nomor baris sesuai dengan pagination -->
                             <td>{{ $project->user->nama }}</td>
                             <td>{{ $project->name ?? 'User Tidak Ditemukan' }}</td>
                             <td>{{ $project->tanggal }}</td>
@@ -138,14 +153,16 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="no-data">Oops, data tidak ada</td>
+                            <td colspan="5" class="no-data">Oops, data tidak ada</td> <!-- Sesuaikan jumlah kolom colspan -->
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+            
         </div>
         
-        <div style="justify-content: right" class="d-flex ">
+        <div class="d-flex box-pagination">
+            <strong>Total Project: {{ $projects->total() }}</strong>
             {{ $projects->links('pagination::bootstrap-4') }}
         </div>
         

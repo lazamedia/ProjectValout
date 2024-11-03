@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\AdminDasboardController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Models\Admin;
@@ -52,6 +54,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::delete('/projects/bulk-delete', [UserDashboardController::class, 'bulkDelete'])->name('user.projects.bulkDelete');
 
+
+    // Rute untuk menampilkan form edit profil
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit')->middleware('auth');
+
+    // Rute untuk memproses pembaruan profil
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update')->middleware('auth');
+
+
 });
 
 
@@ -73,6 +83,14 @@ Route::middleware(['auth:sanctum', RoleMiddleware::class . ':admin,super_admin']
 
     // Rute untuk menghapus proyek
     Route::delete('/admin/projects/{project}', [AdminDashboardController::class, 'destroy'])->name('admin.destroy');
+
+
+    // Route untuk menampilkan daftar pengguna
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+
+    // Route untuk memperbarui data pengguna via AJAX
+    Route::post('/users/update', [AdminUserController::class, 'update'])->name('users.update');
+    Route::resource('users', AdminUserController::class);
 
 });
 
