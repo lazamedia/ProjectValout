@@ -28,7 +28,9 @@
         display: flex;
         justify-content: space-between;
         gap: 20px;
+        width: 100%;
         box-sizing: border-box;
+        flex-wrap: wrap;
     }
     .form-group input{
         width: 100%;
@@ -54,7 +56,9 @@
         margin-bottom: 50px;
     }
     .form-group{
-        width: 100%;
+        width: auto;
+        box-sizing: border-box;
+
     }
     .form-group label {
         font-weight: 100;
@@ -104,7 +108,7 @@
                 </div>
 
                 <!-- Tanggal, Jam Mulai, dan Jam Berakhir -->
-                <div class="form-row mb-4">
+                <div class="form-row ">
                     <div class="form-group ">
                         <label for="tanggal">Tanggal</label>
                         <input type="date" class="form-control" id="tanggal" name="tanggal" required>

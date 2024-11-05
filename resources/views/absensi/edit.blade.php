@@ -11,6 +11,8 @@
 <style>
     .container{
         min-height: 70vh !important;
+        background-color: #019a9500;
+        margin: 20px;
     }
     .judul{
         width: 100%;
@@ -28,6 +30,7 @@
         justify-content: space-between;
         gap: 20px;
         box-sizing: border-box;
+        flex-wrap: wrap;
     }
     .form-group input{
         width: 100%;
@@ -72,11 +75,6 @@
         border: 1px solid #019a94;
         color: #019a94;
     }
-    @media (max-width: 780px) {
-        .container{
-            width: 90%;
-        }
-    }
 </style>
 
 <div class="judul">
@@ -84,7 +82,7 @@
     <p>Room untuk anggota melakukan absen</p>
 </div>
 
-<div class="container">
+<div class="box-tabel">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10 col-sm-12 form-container">
             <form action="{{ route('rooms.update', $room->id) }}" method="POST">
