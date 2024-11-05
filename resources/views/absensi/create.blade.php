@@ -12,7 +12,6 @@
     .container{
         min-height: 70vh !important;
         background-color: #019a9500;
-        margin: 20px;
     }
     .judul{
         width: 100%;
@@ -73,6 +72,11 @@
         background-color: #019a9500;
         border: 1px solid #019a94;
         color: #019a94;
+    }
+    @media (max-width: 780px) {
+        .container{
+            width: 90%;
+        }
     }
 
 </style>
