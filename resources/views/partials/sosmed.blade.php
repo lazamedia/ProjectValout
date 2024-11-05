@@ -254,6 +254,12 @@
     <div class="social-icons" id="socialIcons">
         <!-- Admin Icon -->
         @if (auth()->check() && auth()->user()->hasRole('admin'))
+
+        <a href="/rooms" class="social-icon link">
+            <i class="bi bi-person-plus text-white" style="font-size: 24px;"></i>
+            <span class="icon-label">Absensi</span>
+        </a>
+
         <a href="/admin" class="social-icon link">
             <i class="bi bi-laptop text-white" style="font-size: 24px;"></i>
             <span class="icon-label">Admin</span>
@@ -266,23 +272,26 @@
 
         @endif
 
-
+        <a class="social-icon wa" href="/absenku">
+            <i class="bi bi-person-video3 text-white" style="font-size: 24px;"></i>
+            <span class="icon-label">Absen</span>
+        </a>
 
         <a class="social-icon wa" href="/profile">
             <i class="bi bi-person-gear text-white" style="font-size: 24px;"></i>
             <span class="icon-label">Profile</span>
         </a>
 
-        <!-- Discord Icon -->
-        <div class="social-icon wa" onclick="redirectToDiscord()">
+        
+        {{-- <a class="social-icon wa" href="/">
             <i class="bi bi-discord text-white" style="font-size: 24px;"></i>
             <span class="icon-label">Discord</span>
-        </div>
-        <!-- Instagram Icon -->
+        </a>
+        
         <div class="social-icon ig" onclick="redirectToInstagram()">
             <i class="bi bi-instagram text-white" style="font-size: 24px;"></i>
             <span class="icon-label">Instagram</span>
-        </div>
+        </div> --}}
 
 
         <!-- Info Icon -->

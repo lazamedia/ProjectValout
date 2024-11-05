@@ -3,6 +3,8 @@ body {
     background-color: #111325;
     color: #f5f5f5;
     font-family: 'Quantico';
+    box-sizing: border-box;
+    margin: 0;
 }
 
 .hero-section h1{
@@ -55,8 +57,9 @@ body {
 }
 
 .btn-delete:hover {
-    background-color: #dc3545;
-    color: #ffffff;
+    background-color: #dc354600;
+    color: #01cfbe;
+    border: 1px solid #01cfbe;
 }
 
 .hero-section {
@@ -91,6 +94,7 @@ body {
 .action-box{
     display: flex;
     gap: 20px;
+    width: auto;
     align-content: center;
     align-items: center;
 }
@@ -124,6 +128,10 @@ body {
     color: #f5f5f5;
     font-size: 15pt;
     display: none; /* Sembunyikan ikon hapus secara default */
+}
+.btn-info:hover{
+    background-color: #111325 !important;
+    color: #111325;
 }
 .bulk-delete-btn{
     font-size: 2pt;

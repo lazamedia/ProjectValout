@@ -1,11 +1,15 @@
 <?php
 
+use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AdminDasboardController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MandiriAbsensiController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\UserAbsensiController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Models\Admin;
@@ -24,6 +28,28 @@ Route::get('/register', function () {
         "active" => "register"
     ]);
 });
+
+Route::get('/absensi', function () {
+    return view('absensi.index',[
+        "title" => "absensi",
+        "active" => "absensi"
+    ]);
+});
+
+Route::get('/absensi/absen', function () {
+    return view('absensi.absen',[
+        "title" => "absensi",
+        "active" => "absensi"
+    ]);
+});
+
+Route::get('/absensi/create', function () {
+    return view('absensi.create',[
+        "title" => "absensi",
+        "active" => "absensi"
+    ]);
+});
+
 
 // LOGIN LOGUOT
 Route::get('/login', [LoginController::class, 'index' ] )->name('login')->middleware('guest');
@@ -92,5 +118,21 @@ Route::middleware(['auth:sanctum', RoleMiddleware::class . ':admin,super_admin']
     Route::post('/users/update', [AdminUserController::class, 'update'])->name('users.update');
     Route::resource('users', AdminUserController::class);
 
+
+    Route::get('/absensi/{kode}', [AbsensiController::class, 'createAbsensi'])->name('absensi.createAbsensi');
+    Route::post('/absensi/{kode}', [AbsensiController::class, 'store'])->name('absensi.store');
+    Route::delete('/absensi/{id}', [AbsensiController::class, 'destroy'])->name('absensi.destroy');
+    Route::get('/absensi/mandiri', [AbsensiController::class, 'createAbsensi'])->name('absensi.mandiri');
+
+    Route::resource('rooms', RoomController::class);
+    // Route untuk menambahkan absensi via NIM (hanya admin)
+    Route::post('/absensi/{room_id}/add', [AbsensiController::class, 'addByNim'])->name('absensi.addByNim');
+
 });
 
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/absenku', [UserAbsensiController::class, 'index'])->name('absenku.index');
+    Route::post('/absenku/check', [UserAbsensiController::class, 'checkKode'])->name('absenku.check');
+});

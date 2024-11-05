@@ -1,5 +1,3 @@
-{{-- resources/views/user/profile/edit.blade.php --}}
-
 @extends('layouts.main')
 
 @section('content')
@@ -38,19 +36,20 @@
     }
 
     .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 10px;
     }
 
     .form-label {
-        font-weight: 200;
+        font-size: 10pt;
+        font-weight: 100;
         color: #f7efef;
     }
 
     .form-control {
         border-radius: 4px;
         border: 1px solid #cccccc;
-        padding: 10px 15px;
-        font-size: 1rem;
+        padding: 5px 15px;
+        font-size: 15px;
     }
 
     .form-control:focus {
@@ -124,7 +123,65 @@
         transform: scale(1.0.3)
     }
 
+    /* Tambahan CSS untuk Drag and Drop Image Upload */
+    .image-upload-wrapper {
+        position: relative;
+        border: 2px dashed #00b3a3;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        color: #00b3a3;
+        cursor: pointer;
+        transition: background-color 0.3s, border-color 0.3s;
+    }
 
+    .image-upload-wrapper.dragover {
+        background-color: rgba(1, 207, 190, 0.1);
+        border-color: #01cfbe;
+    }
+
+    .image-upload-wrapper img {
+        max-width: 100%;
+        height: auto;
+        max-height: 200px;
+        object-fit: contain;
+        margin-top: 10px;
+        border-radius: 4px;
+    }
+
+    .delete-image-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.7);
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #ff0000;
+        font-size: 18px;
+    }
+
+    .delete-image-btn:hover {
+        background-color: rgba(255, 255, 255, 1);
+    }
+
+    /* Atur agar teks drag-and-drop ditampilkan secara default */
+    .drag-drop-text {
+        display: block;
+    }
+
+    /* Sembunyikan image-preview-container secara default */
+    .image-preview-container {
+        display: none;
+    }
+
+    /* Media Queries */
     @media (max-width: 576px) {
         .hero-section h1 {
             font-size: 2rem;
@@ -147,68 +204,132 @@
 
 <div class="container mt-5">
    <div class="c-profile">
-        {{-- Hapus atau komentari notifikasi Bootstrap
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
 
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <strong>Whoops!</strong> Ada beberapa masalah dengan input Anda.<br><br>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-        --}}
-
-        <form action="{{ route('profile.update') }}" method="POST">
+        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
-            {{-- Username --}}
-            <div class="form-group">
-                <label for="username" class="form-label">Username</label>
-                <input 
-                    type="text" 
-                    class="form-control @error('username') is-invalid @enderror" 
-                    id="username" 
-                    name="username" 
-                    value="{{ old('username', $user->username) }}" 
-                    required
-                    placeholder="Masukkan username baru"
-                >
-                @error('username')
-                    <div class="invalid-feedback">
-                        {{ $message }}
+            <div class="row">
+                {{-- Kotak Kiri: Username, Nama, NIM, Kelas --}}
+                <div class="col-md-6">
+                    {{-- Username --}}
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username</label>
+                        <input 
+                            type="text" 
+                            class="form-control @error('username') is-invalid @enderror" 
+                            id="username" 
+                            name="username" 
+                            value="{{ old('username', $user->username) }}" 
+                            required
+                            placeholder="Masukkan username baru"
+                        >
+                        @error('username')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
-                @enderror
+
+                    {{-- Nama --}}
+                    <div class="form-group">
+                        <label for="nama" class="form-label">Nama</label>
+                        <input 
+                            type="text" 
+                            class="form-control @error('nama') is-invalid @enderror" 
+                            id="nama" 
+                            name="nama" 
+                            value="{{ old('nama', $user->nama) }}" 
+                            required
+                            placeholder="Masukkan nama lengkap Anda"
+                        >
+                        @error('nama')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
+                    {{-- NIM --}}
+                    <div class="form-group">
+                        <label for="nim" class="form-label">NIM</label>
+                        <input 
+                            type="text" 
+                            class="form-control @error('nim') is-invalid @enderror" 
+                            id="nim" 
+                            name="nim" 
+                            value="{{ old('nim', $user->nim) }}" 
+                            required
+                            placeholder="Masukkan NIM Anda"
+                        >
+                        @error('nim')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
+                    {{-- Kelas --}}
+                    <div class="form-group">
+                        <label for="kelas" class="form-label">Kelas</label>
+                        <input 
+                            type="text" 
+                            class="form-control @error('kelas') is-invalid @enderror" 
+                            id="kelas" 
+                            name="kelas" 
+                            value="{{ old('kelas', $user->kelas) }}" 
+                            required
+                            placeholder="Masukkan kelas Anda"
+                        >
+                        @error('kelas')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Kotak Kanan: Drag and Drop Image Upload --}}
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="image" class="form-label">Foto Profil</label>
+                        <div 
+                            class="image-upload-wrapper @error('image') is-invalid @enderror" 
+                            id="image-upload-wrapper"
+                        >
+                            {{-- Teks Drag and Drop --}}
+                            <div class="drag-drop-text" id="drag-drop-text">
+                                <p>Seret dan lepas gambar di sini atau klik untuk memilih gambar</p>
+                            </div>
+
+                            {{-- Preview Gambar dan Tombol Delete --}}
+                            <div class="image-preview-container" id="image-preview-container">
+                                <img src="#" alt="Profile Image" id="profile-image-preview">
+                                <button type="button" class="delete-image-btn" id="delete-image-btn">&times;</button>
+                            </div>
+
+                            {{-- Input File Tersembunyi --}}
+                            <input 
+                                type="file" 
+                                id="image" 
+                                name="image" 
+                                accept="image/*" 
+                                style="display: none;"
+                            >
+                        </div>
+                        @error('image')
+                            <div class="invalid-feedback d-block">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                        {{-- Input tersembunyi untuk menandai penghapusan gambar --}}
+                        @if($user->image)
+                            <input type="hidden" id="delete_image" name="delete_image" value="{{ old('delete_image', $user->delete_image) }}">
+                        @endif
+                    </div>
+                </div>
             </div>
 
-            {{-- Nama --}}
-            <div class="form-group">
-                <label for="nama" class="form-label">Nama</label>
-                <input 
-                    type="text" 
-                    class="form-control @error('nama') is-invalid @enderror" 
-                    id="nama" 
-                    name="nama" 
-                    value="{{ old('nama', $user->nama) }}" 
-                    required
-                    placeholder="Masukkan nama lengkap Anda"
-                >
-                @error('nama')
-                    <div class="invalid-feedback">
-                        {{ $message }}
-                    </div>
-                @enderror
-            </div>
-
-            {{-- Password dan Konfirmasi Password Bersebelahan --}}
+            {{-- Password dan Konfirmasi Password --}}
             <div class="row password-row">
                 {{-- Password --}}
                 <div class="form-group col-md-6">
@@ -320,6 +441,93 @@
 
         password.addEventListener('input', validatePassword);
         passwordConfirmation.addEventListener('input', validatePassword);
+
+        // Script untuk Drag and Drop Image Upload
+        const imageUploadWrapper = document.getElementById('image-upload-wrapper');
+        const profileImageInput = document.getElementById('image');
+        const dragDropText = document.getElementById('drag-drop-text');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const profileImagePreview = document.getElementById('profile-image-preview');
+        const deleteImageBtn = document.getElementById('delete-image-btn');
+        const deleteProfileImageInput = document.getElementById('delete_image');
+
+        // Fungsi untuk menampilkan preview gambar
+        function previewImage(file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                profileImagePreview.src = e.target.result;
+                imagePreviewContainer.style.display = 'block';
+                dragDropText.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // Inisialisasi jika sudah ada gambar
+        @if($user->image && !$user->delete_image)
+            imagePreviewContainer.style.display = 'block';
+            dragDropText.style.display = 'none';
+            profileImagePreview.src = "{{ asset('storage/' . $user->image) }}";
+        @endif
+
+        // Event click untuk membuka dialog file
+        imageUploadWrapper.addEventListener('click', () => {
+            profileImageInput.click();
+        });
+
+        // Event dragover
+        imageUploadWrapper.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            imageUploadWrapper.classList.add('dragover');
+        });
+
+        // Event dragleave
+        imageUploadWrapper.addEventListener('dragleave', () => {
+            imageUploadWrapper.classList.remove('dragover');
+        });
+
+        // Event drop
+        imageUploadWrapper.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageUploadWrapper.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                profileImageInput.files = files;
+                previewImage(files[0]);
+                // Jika ada gambar yang dihapus sebelumnya, reset input delete
+                if (deleteProfileImageInput) {
+                    deleteProfileImageInput.value = '';
+                }
+            }
+        });
+
+        // Event change pada input file
+        profileImageInput.addEventListener('change', () => {
+            if (profileImageInput.files && profileImageInput.files[0]) {
+                previewImage(profileImageInput.files[0]);
+                // Jika ada gambar yang dihapus sebelumnya, reset input delete
+                if (deleteProfileImageInput) {
+                    deleteProfileImageInput.value = '';
+                }
+            }
+        });
+
+        // Script untuk menghapus gambar profil
+        if (deleteImageBtn) {
+            deleteImageBtn.addEventListener('click', function (e) {
+                e.stopPropagation(); // Mencegah event click pada wrapper
+                // Menghapus preview gambar
+                imagePreviewContainer.style.display = 'none';
+                profileImagePreview.src = '#';
+                // Menampilkan kembali teks drag-and-drop
+                dragDropText.style.display = 'block';
+                // Mengosongkan input file
+                profileImageInput.value = '';
+                // Menandai bahwa gambar harus dihapus
+                if (deleteProfileImageInput) {
+                    deleteProfileImageInput.value = '1';
+                }
+            });
+        }
     });
 </script>
 

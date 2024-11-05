@@ -21,6 +21,9 @@ class User extends Authenticatable
         'nama',
         'username',
         'password',
+        'nim',
+        'kelas',
+        'image',
     ];
 
     /**
@@ -32,4 +35,10 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+    
+    // Relasi dengan Absensi
+    public function absensis()
+    {
+        return $this->hasMany(Absensi::class);
+    }
 }
