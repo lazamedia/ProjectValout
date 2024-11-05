@@ -309,9 +309,9 @@
             <p>Jangan ragu untuk bertanya kepada kami</p>
 
             <div class="info">
-                <a href=""><i class="bi bi-whatsapp text-white"> Humas</i></a>
-                <a href=""><i class="bi bi-whatsapp text-white"> Ketua</i></a>
-                <a href=""><i class="bi bi-whatsapp text-white"> Pemateri</i></a>
+                <a href="https://wa.me/6281387584175"><i class="bi bi-whatsapp text-white"> Humas</i></a>
+                <a href="https://wa.me/6285713457076"><i class="bi bi-whatsapp text-white"> Ketua</i></a>
+                <a href="https://wa.me/6282134749670"><i class="bi bi-whatsapp text-white"> Pemateri</i></a>
             </div>
             
         </div>

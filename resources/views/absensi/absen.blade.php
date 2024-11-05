@@ -79,7 +79,7 @@
 <div class="container">
     <div class="judul">
         <div class="judul-kanan">
-            <h4>Absen Anggota {{ $room->nama_room }}</h4>
+            <h4> {{ $room->nama_room }}</h4>
         <p>Tema: {{ $room->tema }}</p>
         <p>{{ \Carbon\Carbon::parse($room->tanggal)->format('d M Y') }}</p>
         </div>
@@ -91,6 +91,7 @@
     <div class="box-tabel">
 
         <div class="header">
+            <h3>Data Absen</h3>
             {{-- <a href="#" class="tombol">Download</a> --}}
             <div class="action-box">
                 <form class="add-form" action="{{ route('absensi.addByNim', $room->id) }}" method="POST">

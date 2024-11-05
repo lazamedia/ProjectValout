@@ -12,6 +12,7 @@
     .container{
         min-height: 70vh !important;
         background-color: #019a9500;
+        margin: 20px;
     }
     .judul{
         width: 100%;
