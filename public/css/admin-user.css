@@ -1,0 +1,73 @@
+.btn-edit-user {
+    background-color: #01cfbe00;
+    border: 1px solid #01cfbe;
+    color: #01cfbe;
+    font-size: 9pt;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.btn-edit-user:hover {
+    background-color: #01cfbe;
+    color: #020829;
+}
+
+/* Custom SweetAlert Background */
+.custom-swal-popup {
+    background-color: #172433 !important; /* Latar belakang SweetAlert */
+    color: #ffffff; /* Warna teks SweetAlert */
+    border: 1px solid #01cfbe;
+}
+
+/* Custom Confirm Button */
+.custom-swal-confirm-button {
+    background-color: #01cfbe !important; /* Warna tombol konfirmasi */
+    color: #020829 !important;
+    border: none;
+    padding: 10px 15px;
+    font-weight: bold;
+    font-size: 10pt;
+}
+
+.custom-swal-confirm-button:hover {
+    background-color: #019e98 !important; /* Warna tombol saat hover */
+}
+
+/* Custom Cancel Button */
+.custom-swal-cancel-button {
+    background-color: #333 !important; /* Warna tombol batal */
+    color: #ffffff !important;
+    border: none;
+    padding: 10px 15px;
+    font-weight: bold;
+    font-size: 10pt;
+}
+
+.custom-swal-cancel-button:hover {
+    background-color: #555 !important; /* Warna tombol batal saat hover */
+}
+
+.box-pagination{
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+}
+@media (max-width:780px){
+    .box-pagination{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        justify-content: right;
+    }
+}
+
+/* Form dalam SweetAlert */
+.swal2-input {
+    color: #000 !important;
+    background-color: #fff !important;
+}
+
+.swal2-select {
+    color: #000 !important;
+    background-color: #fff !important;
+}

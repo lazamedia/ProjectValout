@@ -104,7 +104,7 @@ class LoginController extends Controller
                 ->with('retryAfter', $blockSeconds);
         }
 
-        return back()->with('loginError', 'Login gagal. Silakan coba lagi. (' . $attemptsLeft . ' percobaan tersisa)');
+        return back()->with('loginError', 'Login gagal. Silakan coba lagi. ');
     }
 
     /**

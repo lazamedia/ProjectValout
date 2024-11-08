@@ -10,81 +10,10 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
 <link rel="stylesheet" href="{{ asset('css/user-home.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin-user.css') }}">
 
 <style>
-    .btn-edit-user {
-        background-color: #01cfbe00;
-        border: 1px solid #01cfbe;
-        color: #01cfbe;
-        font-size: 9pt;
-        margin-right: 10px;
-        cursor: pointer;
-    }
 
-    .btn-edit-user:hover {
-        background-color: #01cfbe;
-        color: #020829;
-    }
-
-    /* Custom SweetAlert Background */
-    .custom-swal-popup {
-        background-color: #172433 !important; /* Latar belakang SweetAlert */
-        color: #ffffff; /* Warna teks SweetAlert */
-        border: 1px solid #01cfbe;
-    }
-
-    /* Custom Confirm Button */
-    .custom-swal-confirm-button {
-        background-color: #01cfbe !important; /* Warna tombol konfirmasi */
-        color: #020829 !important;
-        border: none;
-        padding: 10px 15px;
-        font-weight: bold;
-        font-size: 10pt;
-    }
-
-    .custom-swal-confirm-button:hover {
-        background-color: #019e98 !important; /* Warna tombol saat hover */
-    }
-
-    /* Custom Cancel Button */
-    .custom-swal-cancel-button {
-        background-color: #333 !important; /* Warna tombol batal */
-        color: #ffffff !important;
-        border: none;
-        padding: 10px 15px;
-        font-weight: bold;
-        font-size: 10pt;
-    }
-
-    .custom-swal-cancel-button:hover {
-        background-color: #555 !important; /* Warna tombol batal saat hover */
-    }
-
-    .box-pagination{
-        align-content: center;
-        justify-content: space-between;
-        align-items: center;
-    }
-    @media (max-width:780px){
-        .box-pagination{
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            justify-content: right;
-        }
-    }
-
-    /* Form dalam SweetAlert */
-    .swal2-input {
-        color: #000 !important;
-        background-color: #fff !important;
-    }
-
-    .swal2-select {
-        color: #000 !important;
-        background-color: #fff !important;
-    }
 </style>
 
 <div class="hero-section">
@@ -197,267 +126,268 @@
     <div class="spacer"></div>
 </div>
 
+<script src="{{ asset('js/admin-user.js') }}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Handle search functionality (Real-time)
+document.addEventListener('DOMContentLoaded', function () {
+    // Handle search functionality (Real-time)
 document.getElementById('search-input').addEventListener('input', function(){
-    const query = this.value.toLowerCase().trim();
-    const rows = document.querySelectorAll('#table-body tr:not(.no-data)');
-    let anyVisible = false;
+const query = this.value.toLowerCase().trim();
+const rows = document.querySelectorAll('#table-body tr:not(.no-data)');
+let anyVisible = false;
 
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        let rowText = '';
-        cells.forEach(cell => {
-            rowText += cell.textContent.toLowerCase() + ' ';
-        });
-
-        if(rowText.includes(query)){
-            row.style.display = '';
-            anyVisible = true;
-        } else {
-            row.style.display = 'none';
-        }
+rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    let rowText = '';
+    cells.forEach(cell => {
+        rowText += cell.textContent.toLowerCase() + ' ';
     });
 
-    // Check if any row is visible
-    if(query !== '' && !anyVisible){
-        showNoDataMessage();
+    if(rowText.includes(query)){
+        row.style.display = '';
+        anyVisible = true;
     } else {
-        removeNoDataMessage();
+        row.style.display = 'none';
     }
+});
+
+// Check if any row is visible
+if(query !== '' && !anyVisible){
+    showNoDataMessage();
+} else {
+    removeNoDataMessage();
+}
 });
 
 // Function to show "Oops data tidak ada" message
 function showNoDataMessage() {
-    const tableBody = document.getElementById('table-body');
-    if(!document.getElementById('no-data-row')){
-        const noDataRow = document.createElement('tr');
-        noDataRow.id = 'no-data-row';
-        noDataRow.innerHTML = `
-            <td colspan="4" class="no-data">Oops, data tidak ada</td>
-        `;
-        tableBody.appendChild(noDataRow);
-    }
+const tableBody = document.getElementById('table-body');
+if(!document.getElementById('no-data-row')){
+    const noDataRow = document.createElement('tr');
+    noDataRow.id = 'no-data-row';
+    noDataRow.innerHTML = `
+        <td colspan="4" class="no-data">Oops, data tidak ada</td>
+    `;
+    tableBody.appendChild(noDataRow);
+}
 }
 
 // Function to remove "Oops data tidak ada" message
 function removeNoDataMessage() {
-    const noDataRow = document.getElementById('no-data-row');
-    if(noDataRow){
-        noDataRow.remove();
-    }
+const noDataRow = document.getElementById('no-data-row');
+if(noDataRow){
+    noDataRow.remove();
+}
 }
 
 
-        // Handle Edit User Button Click
-        const editButtons = document.querySelectorAll('.btn-edit-user');
-        editButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const userId = this.getAttribute('data-id');
-                const nama = this.getAttribute('data-nama');
-                const username = this.getAttribute('data-username');
-                const rolesJson = this.getAttribute('data-role');
-                const roles = JSON.parse(rolesJson); // Parsing JSON peran
+    // Handle Edit User Button Click
+    const editButtons = document.querySelectorAll('.btn-edit-user');
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-id');
+            const nama = this.getAttribute('data-nama');
+            const username = this.getAttribute('data-username');
+            const rolesJson = this.getAttribute('data-role');
+            const roles = JSON.parse(rolesJson); // Parsing JSON peran
 
-                // Mendapatkan daftar peran yang tersedia
-                const availableRoles = @json($roles->pluck('name'));
+            // Mendapatkan daftar peran yang tersedia
+            const availableRoles = @json($roles->pluck('name'));
 
-                // Membuat opsi untuk dropdown peran
-                let options = '';
-                availableRoles.forEach(role => {
-                    if(roles.includes(role)){
-                        options += `<option value="${role}" selected>${role.charAt(0).toUpperCase() + role.slice(1)}</option>`;
-                    } else {
-                        options += `<option value="${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</option>`;
+            // Membuat opsi untuk dropdown peran
+            let options = '';
+            availableRoles.forEach(role => {
+                if(roles.includes(role)){
+                    options += `<option value="${role}" selected>${role.charAt(0).toUpperCase() + role.slice(1)}</option>`;
+                } else {
+                    options += `<option value="${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</option>`;
+                }
+            });
+
+            Swal.fire({
+                title: 'Edit User',
+                html: `
+                    <input type="hidden" id="user-id" value="${userId}">
+                    <input type="text" id="nama" class="swal2-input" placeholder="Nama" value="${nama}">
+                    <input type="text" id="username" class="swal2-input" placeholder="Username" value="${username}">
+                    <select id="role" class="swal2-select">
+                        ${options}
+                    </select>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Simpan',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'custom-swal-popup', // Kelas khusus untuk popup
+                    confirmButton: 'custom-swal-confirm-button', // Kelas khusus untuk tombol konfirmasi
+                    cancelButton: 'custom-swal-cancel-button' // Kelas khusus untuk tombol batal
+                },
+                preConfirm: () => {
+                    const id = document.getElementById('user-id').value;
+                    const nama = document.getElementById('nama').value.trim();
+                    const username = document.getElementById('username').value.trim();
+                    const role = document.getElementById('role').value;
+
+                    if (!nama || !username || !role) {
+                        Swal.showValidationMessage('Semua field harus diisi');
+                        return false;
                     }
-                });
 
-                Swal.fire({
-                    title: 'Edit User',
-                    html: `
-                        <input type="hidden" id="user-id" value="${userId}">
-                        <input type="text" id="nama" class="swal2-input" placeholder="Nama" value="${nama}">
-                        <input type="text" id="username" class="swal2-input" placeholder="Username" value="${username}">
-                        <select id="role" class="swal2-select">
-                            ${options}
-                        </select>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: 'Simpan',
-                    cancelButtonText: 'Batal',
-                    customClass: {
-                        popup: 'custom-swal-popup', // Kelas khusus untuk popup
-                        confirmButton: 'custom-swal-confirm-button', // Kelas khusus untuk tombol konfirmasi
-                        cancelButton: 'custom-swal-cancel-button' // Kelas khusus untuk tombol batal
-                    },
-                    preConfirm: () => {
-                        const id = document.getElementById('user-id').value;
-                        const nama = document.getElementById('nama').value.trim();
-                        const username = document.getElementById('username').value.trim();
-                        const role = document.getElementById('role').value;
+                    return { id, nama, username, role };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { id, nama, username, role } = result.value;
 
-                        if (!nama || !username || !role) {
-                            Swal.showValidationMessage('Semua field harus diisi');
-                            return false;
+                    // Kirim permintaan AJAX untuk memperbarui data user
+                    fetch(`{{ route('users.update', '') }}/${id}`, { // Pastikan route sesuai
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            nama: nama,
+                            username: username,
+                            role: role
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw new Error(err.message || 'Terjadi kesalahan.'); });
                         }
-
-                        return { id, nama, username, role };
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const { id, nama, username, role } = result.value;
-
-                        // Kirim permintaan AJAX untuk memperbarui data user
-                        fetch(`{{ route('users.update', '') }}/${id}`, { // Pastikan route sesuai
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            body: JSON.stringify({
-                                nama: nama,
-                                username: username,
-                                role: role
-                            })
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                return response.json().then(err => { throw new Error(err.message || 'Terjadi kesalahan.'); });
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: data.message,
-                                    confirmButtonText: 'OK',
-                                    customClass: {
-                                        popup: 'custom-swal-popup',
-                                        confirmButton: 'custom-swal-confirm-button'
-                                    }
-                                }).then(() => {
-                                    // Reload halaman atau update tabel secara dinamis
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Gagal!',
-                                    text: data.message || 'Terjadi kesalahan.',
-                                    confirmButtonText: 'OK',
-                                    customClass: {
-                                        popup: 'custom-swal-popup',
-                                        confirmButton: 'custom-swal-confirm-button'
-                                    }
-                                });
-                            }
-                        })
-                        .catch(error => {
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: data.message,
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-swal-popup',
+                                    confirmButton: 'custom-swal-confirm-button'
+                                }
+                            }).then(() => {
+                                // Reload halaman atau update tabel secara dinamis
+                                location.reload();
+                            });
+                        } else {
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Terjadi Kesalahan!',
-                                text: error.message,
+                                title: 'Gagal!',
+                                text: data.message || 'Terjadi kesalahan.',
                                 confirmButtonText: 'OK',
                                 customClass: {
                                     popup: 'custom-swal-popup',
                                     confirmButton: 'custom-swal-confirm-button'
                                 }
                             });
-                            console.error('Error:', error);
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Terjadi Kesalahan!',
+                            text: error.message,
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                popup: 'custom-swal-popup',
+                                confirmButton: 'custom-swal-confirm-button'
+                            }
                         });
-                    }
-                });
+                        console.error('Error:', error);
+                    });
+                }
             });
         });
     });
+});
 
-    /*** Fitur Hapus Individual ***/
-    const deleteButtons = document.querySelectorAll('.btn-delete-user');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const userId = this.getAttribute('data-id');
-                const nama = this.getAttribute('data-nama');
+/*** Fitur Hapus Individual ***/
+const deleteButtons = document.querySelectorAll('.btn-delete-user');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-id');
+            const nama = this.getAttribute('data-nama');
 
-                Swal.fire({
-                    title: 'Apakah Anda yakin?',
-                    text: `Anda akan menghapus pengguna "${nama}".`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, hapus',
-                    cancelButtonText: 'Batal',
-                    customClass: {
-                        popup: 'custom-swal-popup',
-                        confirmButton: 'custom-swal-confirm-button',
-                        cancelButton: 'custom-swal-cancel-button'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Kirim permintaan AJAX untuk menghapus pengguna
-                        fetch(`{{ route('users.destroy', '') }}/${userId}`, { // Pastikan route sesuai
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                return response.json().then(err => { throw new Error(err.message || 'Terjadi kesalahan.'); });
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: data.message,
-                                    confirmButtonText: 'OK',
-                                    customClass: {
-                                        popup: 'custom-swal-popup',
-                                        confirmButton: 'custom-swal-confirm-button'
-                                    }
-                                }).then(() => {
-                                    // Reload halaman atau hapus baris secara dinamis
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Gagal!',
-                                    text: data.message || 'Terjadi kesalahan.',
-                                    confirmButtonText: 'OK',
-                                    customClass: {
-                                        popup: 'custom-swal-popup',
-                                        confirmButton: 'custom-swal-confirm-button'
-                                    }
-                                });
-                            }
-                        })
-                        .catch(error => {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: `Anda akan menghapus pengguna "${nama}".`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, hapus',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'custom-swal-popup',
+                    confirmButton: 'custom-swal-confirm-button',
+                    cancelButton: 'custom-swal-cancel-button'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Kirim permintaan AJAX untuk menghapus pengguna
+                    fetch(`{{ route('users.destroy', '') }}/${userId}`, { // Pastikan route sesuai
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw new Error(err.message || 'Terjadi kesalahan.'); });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: data.message,
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-swal-popup',
+                                    confirmButton: 'custom-swal-confirm-button'
+                                }
+                            }).then(() => {
+                                // Reload halaman atau hapus baris secara dinamis
+                                location.reload();
+                            });
+                        } else {
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Terjadi Kesalahan!',
-                                text: error.message,
+                                title: 'Gagal!',
+                                text: data.message || 'Terjadi kesalahan.',
                                 confirmButtonText: 'OK',
                                 customClass: {
                                     popup: 'custom-swal-popup',
                                     confirmButton: 'custom-swal-confirm-button'
                                 }
                             });
-                            console.error('Error:', error);
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Terjadi Kesalahan!',
+                            text: error.message,
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                popup: 'custom-swal-popup',
+                                confirmButton: 'custom-swal-confirm-button'
+                            }
                         });
-                    }
-                });
+                        console.error('Error:', error);
+                    });
+                }
             });
         });
+    });
 </script>
 
 @endsection
