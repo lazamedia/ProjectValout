@@ -96,7 +96,7 @@
                                     data-nama="{{ $user->nama }}"
                                     data-username="{{ $user->username }}"
                                     data-role="{{ $user->roles->pluck('name')->toJson() }}" >
-                                    <i style="color: #01cfbe" class="bi bi-pencil-square"></i>
+                                    <i style="color: #000000" class="bi bi-pencil-square"></i>
                                 </button>
                                 <button 
                                     class="btn btn-delete-user btn-sm" 
