@@ -10,57 +10,35 @@ use Illuminate\Support\Facades\Validator;
 class AdminUserController extends Controller
 {
     /**
-     * Tampilkan daftar semua pengguna.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        // Memuat peran pengguna menggunakan eager loading
-        $users = User::with('roles')->paginate(10); // Atur jumlah per halaman sesuai kebutuhan
-        $roles = Role::all(); // Memuat semua peran untuk dropdown di SweetAlert
-        return view('admin.users', compact('users', 'roles'));
-    }
-
-    /**
-     * Perbarui data pengguna tertentu.
+     * Tampilkan daftar semua pengguna dengan opsi pencarian.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
      * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+     */ 
+    public function index(Request $request)
     {
-        // Validasi input
-        $validator = Validator::make($request->all(), [
-            'nama' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username,' . $id,
-            'role' => 'required|exists:roles,name', // Pastikan role ada
-        ]);
+        // Mengambil input pencarian dari request, jika ada
+        $search = $request->input('search');
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first(),
-            ], 422);
+        // Membuat query builder untuk User dengan eager loading peran
+        $query = User::with('roles');
+
+        // Jika ada input pencarian, terapkan filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'LIKE', '%' . $search . '%')
+                  ->orWhere('username', 'LIKE', '%' . $search . '%');
+            });
         }
 
-        // Cari pengguna
-        $user = User::findOrFail($id);
+        // Terapkan paginasi setelah menerapkan filter pencarian
+        $users = $query->paginate(10)->appends(['search' => $search]);
 
-        // Update data pengguna
-        $user->nama = $request->nama;
-        $user->username = $request->username;
-        $user->save();
+        // Memuat semua peran untuk dropdown di SweetAlert
+        $roles = Role::all();
 
-        // Sinkronkan peran pengguna
-        $user->syncRoles([$request->role]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Data pengguna berhasil diperbarui.',
-        ]);
+        return view('admin.users', compact('users', 'roles', 'search'));
     }
-}
 
-    
+    // ... metode lainnya tetap sama
+}

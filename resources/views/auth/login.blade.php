@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Login</title>
+  
+  <!-- Sertakan Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
   <style>
     * {
       margin: 0;
@@ -28,6 +32,7 @@
       width: 100%;
       max-width: 400px;
       transition: all 0.3s ease;
+      position: relative; /* Untuk posisi countdown */
     }
 
     .login-box:hover {
@@ -50,7 +55,7 @@
 
     .input-box input {
       width: 100%;
-      padding: 15px 10px;
+      padding: 12px 10px;
       background: none;
       border: 1px solid #ccc;
       border-radius: 5px;
@@ -62,6 +67,7 @@
 
     .input-box input:focus {
       border-color: #1abc9c;
+      box-shadow: none;
     }
 
     .input-box label {
@@ -91,17 +97,23 @@
       width: 100%;
       background: #1abc9c;
       color: #fff;
-      padding: 15px;
+      padding: 10px;
       border: none;
       cursor: pointer;
       font-size: 16px;
       border-radius: 5px;
       transition: background 0.3s;
       margin-top: 10px;
+      position: relative;
     }
 
     button.btn:hover {
       background: #16a085;
+    }
+
+    button.btn:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
     }
 
     .back-btn {
@@ -128,6 +140,14 @@
       color: #1abc9c;
       text-decoration: underline;
       font-weight: 300;
+    }
+
+    /* Styling untuk countdown-box */
+    .countdown-box {
+      margin-top: 10px;
+      text-align: center;
+      color: #e74c3c;
+      font-size: 14px;
     }
 
     /* Media Query yang Diperbarui */
@@ -158,27 +178,99 @@
         font-size: 14px;
       }
     }
+    .alert {
+      font-size: 10pt !important;
+    }
   </style>
+  
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
 </head>
 <body>
+
   <div class="login-box">
+    @if(session()->has('success'))
+    <div class="alert alert-success alert-dismissible fade show small-text text-align-center" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+    @if(session()->has('loginError'))
+    <div class="alert alert-danger alert-dismissible fade show small-text text-center" role="alert">
+        {{ session('loginError') }}
+        {{-- <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> --}}
+    </div>
+    @endif
     <h2>Login</h2>
     <form action="{{ route('login') }}" method="POST">
       @csrf
       <div class="input-box">
-        <input type="text" name="username" required>
+        <input type="text" name="username" class="form-control @error('username') is-invalid @enderror" id="username" maxlength="50" autofocus required value="{{ old('username') }}">
+        @error('username')
+        <div class="invalid-feedback">
+            {{ $message }}
+        </div>
+        @enderror
         <label>Username</label>
       </div>
       <div class="input-box">
-        <input type="password" name="password" required>
+        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" id="password" required>
+        @error('password')
+        <div class="invalid-feedback">
+            {{ $message }}
+        </div>
+        @enderror
         <label>Password</label>
       </div>
-      <button type="submit" class="btn">Login</button>
+      <button id="login-btn" class="btn" type="submit" {{ session()->has('retryAfter') ? 'disabled' : '' }}>Login</button>
     </form>
+    @if(session()->has('retryAfter'))
+      <div class="countdown-box" id="countdown-box">
+          Coba lagi dalam {{ session('retryAfter') }} detik
+      </div>
+    @endif
     <p>Belum punya akun? <a href="/register">Daftar</a></p>
     {{-- <a href="/" class="back-btn">Kembali ke Beranda</a> --}}
   </div>
+
+  <!-- Sertakan Bootstrap JS (untuk fitur dismissible alert) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script untuk menghilangkan notifikasi error dalam 3 detik -->
+  <script>
+    setTimeout(function() {
+        let alertBox = document.querySelector('.alert');
+        if (alertBox) {
+            // Menggunakan Bootstrap's alert close method
+            let alert = new bootstrap.Alert(alertBox);
+            alert.close();
+        }
+    }, 3000); // Hapus setelah 3 detik
+  </script>
+
+  <!-- Script untuk menghitung mundur waktu login -->
+  @if(session()->has('retryAfter'))
+  <script>
+    let retryAfter = {{ session('retryAfter') }}; // waktu tunggu dalam detik
+    let countdownBox = document.getElementById('countdown-box');
+    let loginButton = document.getElementById('login-btn');
+
+    // Hitung mundur hingga tombol kembali aktif
+    let interval = setInterval(() => {
+        retryAfter--;
+
+        // Jika waktu habis, aktifkan kembali tombol login
+        if (retryAfter <= 0) {
+            clearInterval(interval);
+            countdownBox.innerText = ""; // Hapus teks countdown
+            countdownBox.style.display = 'none'; // Sembunyikan box countdown
+            loginButton.removeAttribute('disabled'); // Hapus atribut disabled pada tombol
+        } else {
+            countdownBox.innerText = "Coba lagi dalam " + retryAfter + " detik";
+        }
+    }, 1000); // Hitung mundur setiap detik
+  </script>
+  @endif
+
 </body>
 </html>

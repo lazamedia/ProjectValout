@@ -282,6 +282,10 @@
             <span class="icon-label">Profile</span>
         </a>
 
+        <a class="social-icon wa" href="/user">
+            <i class="bi bi-folder2-open text-white" style="font-size: 24px;"></i>
+            <span class="icon-label">My Project</span>
+        </a>
         
         {{-- <a class="social-icon wa" href="/">
             <i class="bi bi-discord text-white" style="font-size: 24px;"></i>
@@ -295,10 +299,12 @@
 
 
         <!-- Info Icon -->
+        @if (auth()->check() && auth()->user()->hasRole('user'))
         <div class="social-icon phone" onclick="showPopup()">
             <i class="bi bi-exclamation-circle text-white" style="font-size: 24px;"></i>
             <span class="icon-label">Info</span>
         </div>
+        @endif
     </div>
 
     <!-- Popup Overlay -->

@@ -169,7 +169,15 @@
                                     data-role="{{ $user->roles->pluck('name')->toJson() }}" >
                                     <i style="color: #01cfbe" class="bi bi-pencil-square"></i>
                                 </button>
+                                <button 
+                                    class="btn btn-delete-user btn-sm" 
+                                    title="Hapus User" 
+                                    data-id="{{ $user->id }}"
+                                    data-nama="{{ $user->nama }}">
+                                    <i style="color: #dc3545" class="bi bi-trash"></i>
+                                </button>
                             </td>
+
                         </tr>
                     @empty
                         <tr>
@@ -192,49 +200,55 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Handle search functionality (Real-time)
-        document.getElementById('search-input').addEventListener('input', function(){
-            const query = this.value.toLowerCase().trim();
-            const rows = document.querySelectorAll('#table-body tr:not(.no-data)');
-            let anyVisible = false;
+document.getElementById('search-input').addEventListener('input', function(){
+    const query = this.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#table-body tr:not(.no-data)');
+    let anyVisible = false;
 
-            rows.forEach(row => {
-                const name = row.getAttribute('data-name');
-                if(name.includes(query)){
-                    row.style.display = '';
-                    anyVisible = true;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            // Check if any row is visible
-            if(query !== '' && !anyVisible){
-                showNoDataMessage();
-            } else {
-                removeNoDataMessage();
-            }
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        let rowText = '';
+        cells.forEach(cell => {
+            rowText += cell.textContent.toLowerCase() + ' ';
         });
 
-        // Function to show "Oops data tidak ada" message
-        function showNoDataMessage() {
-            const tableBody = document.getElementById('table-body');
-            if(!document.getElementById('no-data-row')){
-                const noDataRow = document.createElement('tr');
-                noDataRow.id = 'no-data-row';
-                noDataRow.innerHTML = `
-                    <td colspan="5" class="no-data">Oops, data tidak ada</td>
-                `;
-                tableBody.appendChild(noDataRow);
-            }
+        if(rowText.includes(query)){
+            row.style.display = '';
+            anyVisible = true;
+        } else {
+            row.style.display = 'none';
         }
+    });
 
-        // Function to remove "Oops data tidak ada" message
-        function removeNoDataMessage() {
-            const noDataRow = document.getElementById('no-data-row');
-            if(noDataRow){
-                noDataRow.remove();
-            }
-        }
+    // Check if any row is visible
+    if(query !== '' && !anyVisible){
+        showNoDataMessage();
+    } else {
+        removeNoDataMessage();
+    }
+});
+
+// Function to show "Oops data tidak ada" message
+function showNoDataMessage() {
+    const tableBody = document.getElementById('table-body');
+    if(!document.getElementById('no-data-row')){
+        const noDataRow = document.createElement('tr');
+        noDataRow.id = 'no-data-row';
+        noDataRow.innerHTML = `
+            <td colspan="4" class="no-data">Oops, data tidak ada</td>
+        `;
+        tableBody.appendChild(noDataRow);
+    }
+}
+
+// Function to remove "Oops data tidak ada" message
+function removeNoDataMessage() {
+    const noDataRow = document.getElementById('no-data-row');
+    if(noDataRow){
+        noDataRow.remove();
+    }
+}
+
 
         // Handle Edit User Button Click
         const editButtons = document.querySelectorAll('.btn-edit-user');
@@ -361,6 +375,89 @@
             });
         });
     });
+
+    /*** Fitur Hapus Individual ***/
+    const deleteButtons = document.querySelectorAll('.btn-delete-user');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-id');
+                const nama = this.getAttribute('data-nama');
+
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: `Anda akan menghapus pengguna "${nama}".`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        confirmButton: 'custom-swal-confirm-button',
+                        cancelButton: 'custom-swal-cancel-button'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Kirim permintaan AJAX untuk menghapus pengguna
+                        fetch(`{{ route('users.destroy', '') }}/${userId}`, { // Pastikan route sesuai
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(err => { throw new Error(err.message || 'Terjadi kesalahan.'); });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: data.message,
+                                    confirmButtonText: 'OK',
+                                    customClass: {
+                                        popup: 'custom-swal-popup',
+                                        confirmButton: 'custom-swal-confirm-button'
+                                    }
+                                }).then(() => {
+                                    // Reload halaman atau hapus baris secara dinamis
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: data.message || 'Terjadi kesalahan.',
+                                    confirmButtonText: 'OK',
+                                    customClass: {
+                                        popup: 'custom-swal-popup',
+                                        confirmButton: 'custom-swal-confirm-button'
+                                    }
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Terjadi Kesalahan!',
+                                text: error.message,
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'custom-swal-popup',
+                                    confirmButton: 'custom-swal-confirm-button'
+                                }
+                            });
+                            console.error('Error:', error);
+                        });
+                    }
+                });
+            });
+        });
 </script>
 
 @endsection

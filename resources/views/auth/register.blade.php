@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Register</title>
   <style>
+    /* CSS tetap sama seperti yang Anda miliki */
     * {
       margin: 0;
       padding: 0;
@@ -50,7 +51,7 @@
 
     .input-box input {
       width: 100%;
-      padding: 15px 10px;
+      padding: 12px 10px;
       background: none;
       border: 1px solid #ccc;
       border-radius: 5px;
@@ -62,6 +63,7 @@
 
     .input-box input:focus {
       border-color: #1abc9c;
+      box-shadow: none;
     }
 
     .input-box label {
@@ -83,6 +85,7 @@
       left: 3px;
       font-size: 12px;
       color: #1abc9c;
+      box-shadow: none;
       padding-left: 5px;
       padding-right: 5px;
     }
@@ -99,7 +102,8 @@
       width: 100%;
       background: #1abc9c;
       color: #fff;
-      padding: 15px;
+      padding: 10px;
+      margin-bottom: 10px;
       border: none;
       cursor: pointer;
       font-size: 16px;
@@ -110,6 +114,11 @@
 
     button.btn:hover {
       background: #16a085;
+    }
+
+    button.btn:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
     }
 
     .back-btn {
@@ -169,6 +178,8 @@
   </style>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
+  <!-- Sertakan Bootstrap CSS untuk styling alert dan form -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script>
     function validatePassword() {
       const password = document.getElementById("password");
@@ -190,22 +201,34 @@
     <form action="{{ route('register') }}" method="POST">
       @csrf
       <div class="input-box">
-        <input type="text" name="nama" id="nama" required  value="{{ old('nama') }}">
+        <input type="text" name="nama" id="nama" required value="{{ old('nama') }}" class="form-control @error('nama') is-invalid @enderror">
         <label>Nama</label>
+        @error('nama')
+          <div class="invalid-feedback">
+              {{ $message }}
+          </div>
+        @enderror
       </div>
       <div class="input-box">
-        <input type="text" name="username" id="username" required value="{{ old('username') }}">
+        <input type="text" name="username" id="username" required value="{{ old('username') }}" class="form-control @error('username') is-invalid @enderror">
         <label>Username</label>
-        @if ($errors->has('username'))
-        <span style="color: red; font-size: 12px;">{{ $errors->first('username') }}</span>
-        @endif
+        @error('username')
+          <div class="invalid-feedback">
+              {{ $message }}
+          </div>
+        @enderror
       </div>
       <div class="input-box">
-        <input type="password" name="password" id="password" required oninput="validatePassword()">
+        <input type="password" name="password" id="password" required oninput="validatePassword()" class="form-control @error('password') is-invalid @enderror">
         <label>Password</label>
+        @error('password')
+          <div class="invalid-feedback">
+              {{ $message }}
+          </div>
+        @enderror
       </div>
       <div class="input-box">
-        <input type="password" name="password_confirmation" id="confirmPassword" required oninput="validatePassword()">
+        <input type="password" name="password_confirmation" id="confirmPassword" required oninput="validatePassword()" class="form-control">
         <label>Konfirmasi Password</label>
       </div>    
       <button type="submit" class="btn">Registrasi</button>
@@ -213,5 +236,25 @@
     <p>Sudah punya akun? <a href="/login">Login</a></p>
     {{-- <a href="/" class="back-btn">Kembali ke Beranda</a> --}}
   </div>
+
+  <!-- Sertakan Bootstrap JS (untuk dismissible alerts dan fitur lainnya) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script untuk menghilangkan notifikasi error setelah 3 detik -->
+  <script>
+    // Fungsi untuk menghilangkan semua alert setelah 3 detik
+    setTimeout(function() {
+        let alertBoxes = document.querySelectorAll('.alert');
+        alertBoxes.forEach(function(alertBox) {
+            // Tambahkan kelas 'fade' untuk memulai transisi
+            alertBox.classList.add('fade');
+            // Setelah 500ms (waktu transisi), hapus alert dari DOM
+            setTimeout(function() {
+                alertBox.remove();
+            }, 500); // Waktu untuk transisi
+        });
+    }, 3000); // Hapus setelah 3 detik
+  </script>
+
 </body>
 </html>

@@ -16,11 +16,8 @@ use App\Models\Admin;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('auth.login',[
-        "title" => "login",
-        "active" => "login"
-    ]);
-})->middleware('guest');
+    return redirect('/user');
+});
 
 Route::get('/register', function () {
     return view('auth.register',[
@@ -127,6 +124,13 @@ Route::middleware(['auth:sanctum', RoleMiddleware::class . ':admin,super_admin']
     Route::resource('rooms', RoomController::class);
     // Route untuk menambahkan absensi via NIM (hanya admin)
     Route::post('/absensi/{room_id}/add', [AbsensiController::class, 'addByNim'])->name('absensi.addByNim');
+
+
+    Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+
+    // Rute untuk menghapus massal pengguna
+    Route::post('/users/bulk-destroy', [AdminUserController::class, 'bulkDestroy'])->name('users.bulkDestroy');
+
 
 });
 
