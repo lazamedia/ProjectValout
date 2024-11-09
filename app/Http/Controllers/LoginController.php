@@ -56,38 +56,43 @@ class LoginController extends Controller
             'username' => 'required|string|min:3|max:50',
             'password' => 'required|string|min:8|max:50',
         ]);
-
+    
         $throttleKey = $this->throttleKey($request);
         $attemptsKey = 'login_attempts:' . $throttleKey;
         $blockKey = 'login_blocked:' . $throttleKey;
-
+    
         // Cek apakah pengguna saat ini diblokir
         if (RateLimiter::tooManyAttempts($blockKey, 1)) {
             $seconds = RateLimiter::availableIn($blockKey);
             $this->logger->warning('Percobaan login diblokir dari IP: ' . $request->ip());
-
+    
             return back()
                 ->with('loginError', 'Terlalu banyak percobaan login. Coba lagi dalam ' . $seconds . ' detik.')
                 ->with('retryAfter', $seconds);
         }
-
+    
         // Coba autentikasi
         if (Auth::attempt($credentials)) {
             // Autentikasi berhasil
             $request->session()->regenerate();
             RateLimiter::clear($attemptsKey); // Bersihkan percobaan login
             RateLimiter::clear($blockKey); // Bersihkan blokir jika ada
-
+    
+            // Perbarui last_login_at
+            $user = Auth::user();
+            $user->last_login_at = now();
+            $user->save();
+    
             return redirect()->intended('/user');
         }
-
+    
         // Autentikasi gagal
         RateLimiter::hit($attemptsKey, self::ATTEMPT_DECAY_SECONDS);
         $currentAttempts = RateLimiter::attempts($attemptsKey);
         $attemptsLeft = self::MAX_ATTEMPTS - ($currentAttempts % self::MAX_ATTEMPTS);
-
+    
         $this->logger->warning('Login gagal dari IP: ' . $request->ip());
-
+    
         // Jika percobaan login sekarang mencapai kelipatan 3, set block
         if ($currentAttempts % self::MAX_ATTEMPTS === 0) {
             // Hitung jumlah blokir sebelumnya
@@ -95,17 +100,18 @@ class LoginController extends Controller
             // Hitung penundaan berdasarkan jumlah blokir
             $blockSeconds = self::BLOCK_INCREMENT_SECONDS * $blockCount;
             $blockSeconds = min($blockSeconds, self::BLOCK_MAX_SECONDS); // Maksimal 60 detik
-
+    
             // Blokir pengguna selama $blockSeconds detik
             RateLimiter::hit($blockKey, $blockSeconds);
-
+    
             return back()
                 ->with('loginError', 'Terlalu banyak percobaan login. Coba lagi dalam ' . $blockSeconds . ' detik.')
                 ->with('retryAfter', $blockSeconds);
         }
-
-        return back()->with('loginError', 'Login gagal. Silakan coba lagi. ');
+    
+        return back()->with('loginError', 'Login gagal. Silakan coba lagi.');
     }
+    
 
     /**
      * Logout pengguna.

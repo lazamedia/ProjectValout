@@ -70,9 +70,11 @@
                         <th scope="col">Nama</th>
                         <th scope="col">Username</th>
                         <th scope="col">Role</th>
+                        <th scope="col">Status</th> <!-- Kolom Status Baru -->
                         <th scope="col">Aksi</th>
                     </tr>
                 </thead>
+                
                 <tbody id="table-body">
                     @forelse($users as $index => $user)
                         <tr data-name="{{ strtolower($user->nama) }}">
@@ -86,6 +88,22 @@
                                     @endforeach
                                 @else
                                     <span class="badge bg-secondary">No Role</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($user->last_login_at)
+                                    @php
+                                        $now = \Carbon\Carbon::now();
+                                        $lastLogin = \Carbon\Carbon::parse($user->last_login_at);
+                                        $diffInMinutes = $now->diffInMinutes($lastLogin);
+                                    @endphp
+                                    @if($diffInMinutes <= 5) <!-- Misalnya, aktif dalam 5 menit terakhir dianggap aktif -->
+                                        <span class="badge bg-success">Aktif</span>
+                                    @else
+                                        <span class="badge bg-warning">Aktif {{ $lastLogin->diffForHumans() }}</span>
+                                    @endif
+                                @else
+                                    <span class="badge bg-secondary">Tidak Diketahui</span>
                                 @endif
                             </td>
                             <td>
@@ -106,14 +124,14 @@
                                     <i style="color: #dc3545" class="bi bi-trash"></i>
                                 </button>
                             </td>
-
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="no-data">Oops, data tidak ada</td> <!-- Sesuaikan jumlah kolom colspan -->
+                            <td colspan="6" class="no-data">Oops, data tidak ada</td> <!-- Sesuaikan jumlah kolom colspan -->
                         </tr>
                     @endforelse
                 </tbody>
+                
             </table>
         </div>
         
