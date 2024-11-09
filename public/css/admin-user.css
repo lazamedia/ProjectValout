@@ -123,9 +123,7 @@
 }
 
 /* Optional: Tambahkan gaya untuk form dalam popup */
-.popup-content .form-group {
-    margin: 35px !important;
-}
+
 
 .popup-content .form-control {
     width: 100%;

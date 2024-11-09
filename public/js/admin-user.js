@@ -1,5 +1,3 @@
-// public/js/admin-user.js
-
 document.addEventListener('DOMContentLoaded', function () {
     console.log('admin-user.js loaded'); // Debug: Pastikan JS terhubung
 
@@ -65,17 +63,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const userId = this.getAttribute('data-id');
             const nama = this.getAttribute('data-nama');
             const username = this.getAttribute('data-username');
-            const rolesJson = this.getAttribute('data-role');
-            let roles = [];
-            try {
-                roles = JSON.parse(rolesJson);
-                console.log('Parsed roles:', roles); // Debug: Roles yang diparsing
-            } catch (e) {
-                console.error('Error parsing roles JSON:', e);
-            }
+            const role = this.getAttribute('data-role');
 
-            // Mendapatkan daftar peran yang tersedia dari variabel global
-            const availableRoles = window.AdminUser.roles;
+            console.log('User Data:', { userId, nama, username, role }); // Debug: Data pengguna
 
             // Mengisi form popup dengan data pengguna
             document.getElementById('edit-user-id').value = userId;
@@ -85,11 +75,11 @@ document.addEventListener('DOMContentLoaded', function () {
             // Mengatur opsi role
             const roleSelect = document.getElementById('edit-role');
             roleSelect.innerHTML = '<option value="">Pilih Role</option>'; // Reset options
-            availableRoles.forEach(role => {
+            window.AdminUser.roles.forEach(roleOption => {
                 const option = document.createElement('option');
-                option.value = role;
-                option.textContent = role.charAt(0).toUpperCase() + role.slice(1);
-                if(roles.includes(role)){
+                option.value = roleOption;
+                option.textContent = roleOption.charAt(0).toUpperCase() + roleOption.slice(1);
+                if(roleOption === role){
                     option.selected = true;
                 }
                 roleSelect.appendChild(option);
@@ -99,6 +89,41 @@ document.addEventListener('DOMContentLoaded', function () {
             showPopup();
         });
     });
+
+    // Tambahkan event listener untuk overlay
+    const popupOverlay = document.getElementById('popupOverlay');
+    if (popupOverlay) {
+        popupOverlay.addEventListener('click', function(event) {
+            if (event.target === popupOverlay) {
+                hidePopup();
+            }
+        });
+    }
+
+    // Definisikan fungsi showPopup dan hidePopup
+    window.showPopup = function() {
+        const popup = document.getElementById('popupOverlay');
+        if (popup) {
+            popup.classList.add('show');
+            console.log('Popup displayed'); // Debug: Popup ditampilkan
+        } else {
+            console.error('Popup overlay not found');
+        }
+    }
+
+    window.hidePopup = function() {
+        const popup = document.getElementById('popupOverlay');
+        if (popup) {
+            popup.classList.remove('show');
+            console.log('Popup hidden'); // Debug: Popup disembunyikan
+
+            // Reset form setelah ditutup
+            const editUserForm = document.getElementById('edit-user-form');
+            if (editUserForm) {
+                editUserForm.reset();
+            }
+        }
+    }
 
     // Handle form submission
     const editUserForm = document.getElementById('edit-user-form');
@@ -115,7 +140,16 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('Form submitted:', { userId, nama, username, role, password }); // Debug: Data form
 
             if (!nama || !username || !role) {
-                showNotification('Error!', 'Nama, Username, dan Role harus diisi', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Nama, Username, dan Role harus diisi',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        confirmButton: 'custom-swal-confirm-button'
+                    }
+                });
                 return;
             }
 
@@ -133,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Kirim permintaan AJAX untuk memperbarui data user
-            fetch(`${window.AdminUser.routes.update}/${userId}`, { // Pastikan route sesuai
+            fetch(`${window.AdminUser.routes.update}/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -152,24 +186,56 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(data => {
                 console.log('Response data:', data); // Debug: Data response
+
+                // Sembunyikan popup sebelum notifikasi muncul
+                hidePopup();
+
                 if (data.success) {
-                    showNotification('Success!', data.message, 'success');
-                    // Reload halaman atau update tabel secara dinamis
-                    setTimeout(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.message,
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm-button'
+                        }
+                    }).then(() => {
+                        // Reload halaman atau update tabel secara dinamis
                         location.reload();
-                    }, 1500);
+                    });
                 } else {
-                    showNotification('Error!', data.message || 'Terjadi kesalahan.', 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: data.message || 'Terjadi kesalahan.',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            confirmButton: 'custom-swal-confirm-button'
+                        }
+                    });
                 }
             })
             .catch(error => {
-                showNotification('Error!', error.message, 'error');
+                // Sembunyikan popup jika terjadi error
+                hidePopup();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan!',
+                    text: error.message,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'custom-swal-popup',
+                        confirmButton: 'custom-swal-confirm-button'
+                    }
+                });
                 console.error('Error:', error);
             });
         });
     }
 
-    /*** Fitur Hapus Individual ***/
+    // Fitur Hapus User
     const deleteButtons = document.querySelectorAll('.btn-delete-user');
     console.log(`Found ${deleteButtons.length} delete buttons`); // Debug: Jumlah tombol hapus
     deleteButtons.forEach(button => {
@@ -194,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Kirim permintaan AJAX untuk menghapus pengguna
-                    fetch(`${window.AdminUser.routes.destroy}/${userId}`, { // Pastikan route sesuai
+                    fetch(`${window.AdminUser.routes.destroy}/${userId}`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
@@ -257,67 +323,4 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    /*** Popup Handling ***/
-    window.showPopup = function() {
-        const popup = document.getElementById('popupOverlay');
-        if (popup) {
-            popup.style.display = 'flex';
-            console.log('Popup displayed'); // Debug: Popup ditampilkan
-        }
-    }
-
-    window.hidePopup = function(event) {
-        if (event) {
-            // Jika klik di luar konten popup
-            if (event.target.id === 'popupOverlay') {
-                const popup = document.getElementById('popupOverlay');
-                popup.classList.add('hide');
-                setTimeout(() => {
-                    popup.style.display = 'none';
-                    popup.classList.remove('hide');
-                }, 300); // Durasi animasi
-            }
-        } else {
-            // Jika tombol close diklik
-            const popup = document.getElementById('popupOverlay');
-            popup.classList.add('hide');
-            setTimeout(() => {
-                popup.style.display = 'none';
-                popup.classList.remove('hide');
-            }, 300); // Durasi animasi
-        }
-        // Reset form setelah ditutup
-        const editUserForm = document.getElementById('edit-user-form');
-        if (editUserForm) {
-            editUserForm.reset();
-        }
-    }
-
-    /*** Notification Handling ***/
-    window.showNotification = function(title, message, type) {
-        console.log(`Showing notification: ${title} - ${message} - ${type}`); // Debug: Notifikasi
-        // Cek apakah elemen notifikasi sudah ada
-        let notification = document.querySelector('.notification');
-        if (!notification) {
-            notification = document.createElement('div');
-            notification.classList.add('notification');
-            document.body.appendChild(notification);
-        }
-
-        // Atur kelas berdasarkan tipe
-        notification.className = 'notification show';
-        if (type === 'success') {
-            notification.classList.add('success');
-        } else if (type === 'error') {
-            notification.classList.add('error');
-        }
-
-        // Atur konten notifikasi
-        notification.innerHTML = `<strong>${title}</strong><br>${message}`;
-
-        // Hapus notifikasi setelah animasi selesai
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 4000); // Durasi total animasi
-    }
 });
