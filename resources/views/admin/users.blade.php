@@ -70,7 +70,7 @@
                         <th scope="col">Nama</th>
                         <th scope="col">Username</th>
                         <th scope="col">Role</th>
-                        <th scope="col">Status</th> <!-- Kolom Status Baru -->
+                        {{-- <th scope="col">Status</th>  --}}
                         <th scope="col">Aksi</th>
                     </tr>
                 </thead>
@@ -90,7 +90,7 @@
                                     <span class="badge bg-secondary">No Role</span>
                                 @endif
                             </td>
-                            <td>
+                            {{-- <td>
                                 @if($user->last_login_at)
                                     @php
                                         $now = \Carbon\Carbon::now();
@@ -105,7 +105,7 @@
                                 @else
                                     <span class="badge bg-secondary">Tidak Diketahui</span>
                                 @endif
-                            </td>
+                            </td> --}}
                             <td>
                                 <button 
                                     class="btn btn-edit-user btn-sm" 
