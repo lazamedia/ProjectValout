@@ -29,11 +29,11 @@
         p {
             font-size: 0.9rem;
             color: #ffffff;
-            margin-bottom: 20px;
+            margin-bottom: 50px;
         }
         a {
             text-decoration: none;
-            margin-top: 50px;
+            margin-top: 70px;
             font-size: 11pt;
             color: #797979;
         }
@@ -71,15 +71,28 @@
     .box {
         padding: 20px;
     }
+    .btn{
+        background-color: #00000000;
+        border: 1px solid #00f0d0;
+        color: #00db9a;
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-weight: bold;
+        margin: 50px;
+    }
+    .btn:hover{
+        background-color: #00f0d0;
+        color: #000000;
+    }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="box">
             <img src="img/mt.png" lazy='loader' class="img-404" alt="">
-            <h1>Website sedang dalam maintenance</h1>
-            <p>Kami akan kembali secepatnya. Terima kasih atas kesabaran Anda!</p>
-            <p style="font-size:9pt;">Developed by.lazz</p>
+            <h1>Website Pindah ke Web Resmi CYBER</h1>
+            <p>Silahkan kunjungi website resmi CYBER</p>
+            <a href="https://class.cyberamikom.org/login" class="btn" style="margin: 30px" target="_blank">Kunjungi Web</a>
             <ul class="mtn-icons">
             <li><a href="https://wa.me/6282134749670" target="_blank"><i class="fab fa-whatsapp"></i></a></li>
             <li><a href="https://www.instagram.com/lazuardi_mixu/" target="_blank"><i class="fab fa-instagram"></i></a></li>
