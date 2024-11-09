@@ -71,3 +71,68 @@
     color: #000 !important;
     background-color: #fff !important;
 }
+
+
+/* Popup Overlay */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 2000; /* Pastikan z-index cukup tinggi */
+}
+
+.popup-overlay.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Popup Content */
+.popup-content {
+    width: 350px;
+    height: auto;
+    background-color: #ffffff; /* Ubah warna sesuai kebutuhan */
+    color: #000000; /* Ubah warna teks sesuai kebutuhan */
+    padding: 30px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    text-align: center;
+}
+
+.popup-content h4 {
+    margin-top: 0;
+    font-size: 1.5em;
+}
+
+.popup-content .popup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 24px;
+    color: #000000; /* Ubah warna sesuai kebutuhan */
+}
+
+/* Optional: Tambahkan gaya untuk form dalam popup */
+.popup-content .form-group {
+    margin: 35px !important;
+}
+
+.popup-content .form-control {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.popup-content .btn {
+    margin-top: 10px;
+}

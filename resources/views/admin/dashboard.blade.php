@@ -144,7 +144,7 @@
                             <td>{{ $project->tanggal }}</td>
                             <td>
                                 <a href="{{ route('admin.edit', $project->id) }}" class="btn btn-info btn-sm" title="Edit Project">
-                                    <i style="color: #000000" class="bi bi-pencil-square"></i>
+                                    <i style="color: #02e2bd" class="bi bi-pencil-square"></i>
                                 </a>
                                 <a href="{{ route('user.projects.download', $project->id) }}" class="btn btn-success btn-sm" title="Download Semua File">
                                     <i class="bi bi-download"></i>

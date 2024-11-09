@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Spatie\Permission\Models\Role; // Import model Role
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth; // Tambahkan ini untuk memastikan auth() dikenali
+use Illuminate\Support\Facades\Auth; // Untuk otentikasi
 
 class AdminUserController extends Controller
 {
@@ -37,6 +37,7 @@ class AdminUserController extends Controller
             'nama' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $id,
             'role' => 'required|exists:roles,name', // Pastikan role ada
+            'password' => 'nullable|string|min:6', // Password opsional, minimal 6 karakter jika diisi
         ]);
 
         if ($validator->fails()) {
@@ -52,6 +53,12 @@ class AdminUserController extends Controller
         // Update data pengguna
         $user->nama = $request->nama;
         $user->username = $request->username;
+
+        // Update password jika diisi
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password); // Hash password sebelum disimpan
+        }
+
         $user->save();
 
         // Sinkronkan peran pengguna
