@@ -62,17 +62,27 @@
     .btn-add:hover {
         background-color: #0062cc;
     }
+
+    /* Style untuk status aktif/inaktif */
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .status-active {
+        background-color: rgb(2, 255, 2);
+    }
+
+    .status-expired {
+        background-color: rgb(184, 27, 27);
+    }
 </style>
 
 <div class="hero-section">
     <h4><span style="color: #01cfbe">Data,</span> Manajemen </h4>
     <h1>Dashboard <span style="color: #01cfbe" id="dynamic-title">Keaktifan Anggota</span></h1>
-
-    {{-- <div class="tombol-aksi">
-        <a href="{{ route('rooms.create') }}" class="tombol">Create</a>
-        <a href="{{ route('rooms.index') }}" class="tombol">Data Absen</a>
-        <a href="{{ route('rooms.index') }}" class="tombol">Grafik</a>
-    </div> --}}
 </div> 
 
 <div class="container">
@@ -91,11 +101,11 @@
             <table class="table table-dark table-hover table-responsive table-sm">
                 <thead>
                     <tr>
+                        <th></th> <!-- Menambahkan kolom status -->
                         <th>Kode Absen</th>
                         <th>Nama Room</th>
                         <th>Tema</th>
                         <th>Tanggal</th>
-                        {{-- <th>Jam</th> --}}
                         <th>Jumlah</th>
                         <th>Aksi</th>
                     </tr>
@@ -103,11 +113,22 @@
                 <tbody>
                     @foreach($rooms as $room)
                         <tr>
+                            <td>
+                                @php
+                                    $currentTime = \Carbon\Carbon::now();
+                                    $endTime = \Carbon\Carbon::parse($room->tanggal . ' ' . $room->jam_berakhir);
+                                @endphp
+
+                                @if($currentTime->isBefore($endTime)) 
+                                    <span class="status-indicator status-active" title="Room Absen Aktif"></span> <!-- Bulat hijau -->
+                                @else
+                                    <span class="status-indicator status-expired" title="Room Absen Kadaluarsa"></span> <!-- Bulat merah -->
+                                @endif
+                            </td>
                             <td>{{ $room->kode_absen }}</td>
                             <td>{{ $room->nama_room }}</td>
                             <td>{{ $room->tema }}</td>
                             <td>{{ \Carbon\Carbon::parse($room->tanggal)->format('d M Y') }}</td>
-                            {{-- <td>{{ \Carbon\Carbon::parse($room->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($room->jam_berakhir)->format('H:i') }}</td> --}}
                             <td>{{ $room->absensis_count }}</td>
                             <td>
                                 <a href="{{ route('rooms.edit', $room->id) }}" class="btn btn-edit">Edit</a>

@@ -32,18 +32,28 @@
         box-sizing: border-box;
         flex-wrap: wrap;
     }
-    .form-group input{
+    .form-group input,
+    .form-group select {
         width: 100%;
-        background-color: #019a9500;
+        background-color: #f0f8f900;
         color: #019a94;
         border: 1px solid #019a94;
+        border-radius: 5px;
+        padding: 10px 16px;
+        transition: all 0.3s ease;
     }
-    .form-group input:focus{
-        background-color: #019a9500;
+    .form-group{
+        min-width: 200px !important;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+        background-color: #ffffff00;
         color: #86b3b1;
-        box-shadow: 0 2px 8px rgba(10, 190, 175, 0);
+        border: 1px solid #019a94;
+        box-shadow: 0 2px 8px rgba(10, 190, 175, 0.4);
     }
-    .form-group input::placeholder {
+    .form-group input::placeholder,
+    .form-group select::placeholder {
         color: #c2b8b8;
         font-size: 9pt;
     }
@@ -58,10 +68,12 @@
     .form-group{
         width: auto;
         box-sizing: border-box;
-
     }
     .form-group label {
         font-weight: 100;
+        font-size: 12pt;
+        margin-bottom: 10px;
+        color: #019a94;
     }
     .btn-create {
         background-color: #01cfbe;
@@ -69,20 +81,34 @@
         color: rgb(12, 26, 46);
         text-decoration: none;
         box-sizing: border-box;
-        padding: 3px 13px;
+        padding: 10px 20px;
         margin: 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
     }
     .btn-create:hover {
         background-color: #019a9500;
-        border: 1px solid #019a94;
-        color: #019a94;
+        color: #fff;
     }
     @media (max-width: 780px) {
         .container{
             width: 90%;
         }
     }
-
+    .form-group input[type="date"]::-webkit-calendar-picker-indicator {
+        color: #019a94 !important;
+        border-radius: 50%;
+        padding: 5px;
+        cursor: pointer;
+    }
+    .form-group input[type="date"]:focus::-webkit-calendar-picker-indicator {
+        background-color: #86b3b1;
+        color: #019a94 !important;
+    }
+    .form-group input[type="time"]:focus::-webkit-calendar-picker-indicator {
+        background-color: #86b3b1;
+    }
 </style>
 
 <div class="judul">
@@ -108,12 +134,12 @@
                 </div>
 
                 <!-- Tanggal, Jam Mulai, dan Jam Berakhir -->
-                <div class="form-row ">
-                    <div class="form-group ">
+                <div class="form-row">
+                    <div class="form-group">
                         <label for="tanggal">Tanggal</label>
                         <input type="date" class="form-control" id="tanggal" name="tanggal" required>
                     </div>
-                    <div class="form-group ">
+                    <div class="form-group">
                         <label for="jam_mulai">Jam Mulai</label>
                         <input type="time" class="form-control" id="jam_mulai" name="jam_mulai" required>
                     </div>
