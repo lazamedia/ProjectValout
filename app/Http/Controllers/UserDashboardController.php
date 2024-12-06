@@ -19,7 +19,7 @@ class UserDashboardController extends Controller
 {
     /**
      * Display a listing of the projects.
-     */
+     */ 
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -50,6 +50,7 @@ class UserDashboardController extends Controller
 
      public function store(Request $request)
      {
+        // dd($request->all(), $request->file('files'));
          // Validasi input
          $request->validate([
              'name' => 'required|string|max:255',
@@ -252,8 +253,8 @@ class UserDashboardController extends Controller
     {
         $user = Auth::user();
     
-        // Pastikan pengguna memiliki akses ke proyek ini
-        if ($project->user_id !== $user->id) {
+        // Cek apakah pengguna adalah pemilik proyek atau admin
+        if ($project->user_id !== $user->id && !$user->hasRole('admin')) {
             abort(403, 'Aksi tidak diizinkan.');
         }
     
