@@ -1,9 +1,7 @@
-{{-- resources/views/absensi/index.blade.php --}}
 @extends('layouts.main')
 
 @section('content')
 
-<!-- Sertakan SweetAlert2 CSS setelah CSS kustom -->
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
 <link rel="stylesheet" href="{{ asset('css/user-home.css') }}">
@@ -154,7 +152,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Handle SweetAlert for session messages
+
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
